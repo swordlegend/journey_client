@@ -5,3 +5,4 @@ If you want to compile and test this source, you will need to change some packet
 
 # Acknowledgements
 The client uses the nolifenx library by retep 998 to load assets from .nx files.
+https://github.com/NoLifeDev/NoLifeNx
