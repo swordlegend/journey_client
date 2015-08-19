@@ -42,6 +42,7 @@ void CALLBACK Update(PVOID lpParam, BOOLEAN TimerOrWaitFired) {
 		return;
 	}
 	WaitForSingleObject(gTimerDoneEvent, INFINITY);
+	app.getui()->update();
 	SetEvent(gTimerDoneEvent);
 }
 
