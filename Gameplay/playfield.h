@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // This file is part of the Journey MMORPG client                           //
-// Copyright © 2015 SYJourney                                               //
+// Copyright Â© 2015 SYJourney                                               //
 //                                                                          //
 // This program is free software: you can redistribute it and/or modify     //
 // it under the terms of the GNU Affero General Public License as           //
@@ -21,7 +21,12 @@
 #include "account.h"
 #include "camera.h"
 #include "settings.h"
-#include "maplemap.h"
+#include "mapinfo.h"
+#include "mapbackgrounds.h"
+#include "maplayer.h"
+#include "mapobjects.h"
+#include "footholdtree.h"
+#include "mapportals.h"
 
 namespace gameplay
 {
@@ -38,28 +43,33 @@ namespace gameplay
 	public:
 		playfield() {}
 		~playfield() {}
-		char worldid;
-		char channelid;
 		void draw(ID2D1HwndRenderTarget*);
 		void update();
 		void setplayer(player);
+		void setfield(nxprovider*, int, char);
 		void changechannel(char) {}
-		void changemap(maplemap, char);
+		void setworldchannel(char wld, char chd) { worldid = wld; channelid = chd; }
 		bool moveup();
+		void useattack(int);
 		player* getplayer() { return &playerchar; }
 		account* getaccount() { return &m_account; }
-		maplemap* getmap() { return &m_map; }
+		mapobjects* getmapobjects() { return &map_objects; }
 		map<char, world>* getworlds() { return &worlds; }
+		char getchannel() { return channelid; }
 	private:
 		player playerchar;
 		camera view;
+		mapinfo map_info;
+		mapbackgrounds backgrounds;
+		map<char, maplayer> maplayers;
+		mapobjects map_objects;
+		footholdtree footholds;
+		mapportals portals;
 		account m_account;
 		gamestep step;
-		maplemap m_map;
 		map<char, world> worlds;
-		/*struct mapinfo mapinfo;
-		struct mapsprites mapsprites;
-		struct mapobjects mapobjects;*/
+		char worldid;
+		char channelid;
 	};
 }
 
