@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // This file is part of the Journey MMORPG client                           //
-// Copyright © 2015 SYJourney                                               //
+// Copyright Â© 2015 SYJourney                                               //
 //                                                                          //
 // This program is free software: you can redistribute it and/or modify     //
 // it under the terms of the GNU Affero General Public License as           //
@@ -238,19 +238,6 @@ namespace program
 
 			d2d_rtarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
 
-			if (result == 0)
-			{
-				d2d_rtarget->CreateSolidColorBrush(
-					D2D1::ColorF(D2D1::ColorF::Black),
-					&black_brush
-					);
-
-				d2d_rtarget->CreateSolidColorBrush(
-					D2D1::ColorF(D2D1::ColorF::White),
-					&white_brush
-					);
-			}
-
 			result = d2d_rtarget->CreateLayer(NULL, &d2d_layer);
 		}
 
@@ -260,13 +247,10 @@ namespace program
 			d2d_rtarget->Clear(D2D1::ColorF(D2D1::ColorF::White));
 			uinterface.draw(d2d_rtarget);
 			d2d_rtarget->EndDraw();
-			uinterface.update();
 		}
 		else
 		{
 			SafeRelease(&d2d_rtarget);
-			SafeRelease(&black_brush);
-			SafeRelease(&white_brush);
 		}
 	}
 }
