@@ -19,7 +19,6 @@
 #include "stdfax.h"
 #include "maplechar.h"
 #include "inventory.h"
-#include "maplemap.h"
 
 using namespace std;
 
