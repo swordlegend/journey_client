@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // This file is part of the Journey MMORPG client                           //
-// Copyright © 2015 SYJourney                                               //
+// Copyright Â© 2015 SYJourney                                               //
 //                                                                          //
 // This program is free software: you can redistribute it and/or modify     //
 // it under the terms of the GNU Affero General Public License as           //
@@ -69,16 +69,14 @@ namespace gameplay
 		map<short, string> areainfo;
 		vector2d position;
 		short movestate;
-		maplemap* pmap;
-		fthold ground;
-		fthold lbound;
-		fthold rbound;
+		footholdtree* footholds;
 		short speed;
 		short jump;
 		float hspeed;
 		float vspeed;
 		float fx;
 		float fy;
+		float ground;
 		bool fleft;
 		bool nofriction;
 		void recalcstats(bool);
@@ -91,8 +89,9 @@ namespace gameplay
 		maplestats* getstats();
 		inventory* getinventory();
 		vector2d getposition();
+		bool getleft() { return fleft; }
 		void setposition(vector2d);
-		void setmap(maplemap*);
+		void setfh(footholdtree*);
 		void draw(ID2D1HwndRenderTarget*, vector2d);
 		void update();
 		void crouch(bool);
