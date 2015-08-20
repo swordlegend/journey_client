@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // This file is part of the Journey MMORPG client                           //
-// Copyright © 2015 SYJourney                                               //
+// Copyright Â© 2015 SYJourney                                               //
 //                                                                          //
 // This program is free software: you can redistribute it and/or modify     //
 // it under the terms of the GNU Affero General Public License as           //
@@ -26,10 +26,10 @@ namespace gameplay
 	{
 		look = ch->copylook();
 		stats = ch->copystats();
+		invent = inv;
 
 		recalcstats(true);
 
-		invent = inv;
 		skills = skil;
 		cooldowns = cd;
 		quests = quest;
@@ -76,8 +76,8 @@ namespace gameplay
 		hspeed = 0;
 		vspeed = 0;
 
-		ground = pmap->getgroundbelow(position);
-		standing = position.y() >= ground.vertical.y();
+		ground = footholds->getgroundbelow(position);
+		standing = position.y() >= ground;
 
 		if (standing)
 			look.setstate("stand1");
@@ -128,53 +128,15 @@ namespace gameplay
 				hspeed = 0;
 		}
 
-		if (hspeed > 0 && vspeed == 0)
-		{
-			if (fx > ground.horizontal.y() || fx < ground.horizontal.x())
-			{
-				fthold nextground = pmap->getnextground(ground, position, fleft);
-				if (!fleft)
-				{
-					if (nextground.vertical.y() != ground.vertical.x())
-					{
-						if (abs(nextground.vertical.y() - ground.vertical.x()) > 1)
-						{
-							standing = false;
-							look.setstate("jump");
-						}
-						else if (!nextground.vertical.straight())
-						{
-							fy = static_cast<float>(nextground.vertical.y());
-						}
-					}
-				}
-				else
-				{
-					if (nextground.vertical.x() != ground.vertical.y())
-					{
-						if (abs(nextground.vertical.x() - ground.vertical.y()) > 1)
-						{
-							standing = false;
-							look.setstate("jump");
-						}
-						else if (!nextground.vertical.straight())
-						{
-							fy = static_cast<float>(nextground.vertical.x());
-						}
-					}
-				}
-				ground = nextground;
-			}
-		}
-		else if (abs(vspeed) > 0)
-		{
-			lbound = pmap->getleftbound(lbound);
-			rbound = pmap->getrightbound(rbound);
-		}
-
+		
 		if (vspeed > 0)
 		{
-			ground = pmap->getgroundbelow(position);
+			ground = footholds->getgroundbelow(position);
+		}
+		else if (hspeed > 0)
+		{
+			ground = footholds->nextground(fleft, position);
+			standing = position.y() >= ground;
 		}
 
 		if (!standing)
@@ -184,13 +146,14 @@ namespace gameplay
 				vspeed = fallspeed;
 
 			movestate = movestate | MC_JUMP;
+			look.setstate("jump");
 
 			if (vspeed > 0)
 			{
-				if (fy + vspeed > ground.vertical.y())
+				if (fy + vspeed > ground)
 				{
 					vspeed = 0;
-					fy = static_cast<float>(ground.vertical.y());
+					fy = ground;
 					standing = true;
 
 					movestate = movestate ^ MC_JUMP;
@@ -261,8 +224,8 @@ namespace gameplay
 					look.setstate("jump");
 					if (movestate == MC_CROUCH)
 					{
-						fthold gbelow = pmap->getgroundbelow(position + vector2d(0, 5));
-						if (gbelow.vertical.x() > ground.vertical.x() && (gbelow.vertical - ground.vertical).length() < 1000)
+						float gbelow = footholds->getgroundbelow(position + vector2d(0, 5));
+						if (gbelow > ground && gbelow - ground < 1000)
 						{
 							setposition(position + vector2d(0, 5));
 							newstate = MC_JUMP;
@@ -299,11 +262,14 @@ namespace gameplay
 	{
 		speed = 100;
 		jump = 100;
-		//go through eq and add stats, check if no friction 
+
+		invent.recalcstats();
+
+		stats.basedamage = static_cast<int>((static_cast<float>(5 * stats.level)/100) * invent.gettotal(ES_WATK) * invent.getwepmult());
 	}
 
-	void player::setmap(maplemap* m)
+	void player::setfh(footholdtree* fh)
 	{
-		pmap = m;
+		footholds = fh;
 	}
 }
