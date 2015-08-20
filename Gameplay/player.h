@@ -19,6 +19,7 @@
 #include "stdfax.h"
 #include "maplechar.h"
 #include "inventory.h"
+#include "footholdtree.h"
 
 using namespace std;
 
