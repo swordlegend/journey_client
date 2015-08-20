@@ -348,16 +348,16 @@ namespace net
 			app.getui()->getprovider()->clearcache(CM_LOGIN);
 			app.getui()->add(UI_STATUSBAR);
 			app.getui()->getfield()->setplayer(player(app.getui()->getfield()->getaccount()->getplayer(), inv, skills, cooldowns, quests, completedquests, trockmaps, bookcover, bookcards, areainfo));
-			app.getui()->getfield()->changemap(app.getui()->getprovider()->loadmap(app.getui()->getfield()->getplayer()->getstats()->map), app.getui()->getfield()->getplayer()->getstats()->spawnp);
+			app.getui()->getfield()->setfield(app.getui()->getprovider(), app.getui()->getfield()->getplayer()->getstats()->map, app.getui()->getfield()->getplayer()->getstats()->spawnp);
 			app.getui()->enableactions();
 		}
 
 		inventory charinfo_h::getinventory(packet* recv)
 		{
-			char* slots = new char[5];
+			vector<char> slots;
 			for (char i = 0; i < 5; i++)
 			{
-				slots[i] = recv->readbyte();
+				slots.push_back(recv->readbyte());
 			}
 			recv->readlong();
 			map<short, mapleequip> equipped;
@@ -542,7 +542,7 @@ namespace net
 			short ry = recv.readshort();
 			npc toadd = app.getui()->getprovider()->loadnpc(id);
 			toadd.setinfo(oid, f, fh, vector2d(posx, cy));
-			app.getui()->getfield()->getmap()->addnpc(oid, toadd);
+			app.getui()->getfield()->getmapobjects()->addnpc(oid, toadd);
 		}
 	};
 
@@ -601,6 +601,43 @@ namespace net
 		}
 	};
 
+	class modify_inventory_h : public vhandler
+	{
+		void modify_inventory_h::handle(packet recv)
+		{
+			bool updatetick = recv.readbool();
+			char size = recv.readbyte();
+			for (char i = 0; i < size; i++)
+			{
+				char mode = recv.readbyte();
+				char invtype = recv.readbyte();
+				short pos = recv.readshort(); //if move: oldposition, else position
+				short arg = recv.readshort();
+
+				if ((mode == 2 && (pos < 0 || arg < 0)) || mode == 3 && pos < 0)
+				{
+					char addmove = recv.readbyte();
+				}
+
+				switch (mode)
+				{
+				case 0:
+					//additem
+					break;
+				case 1:
+					//quantity
+					break;
+				case 2:
+					//move
+					break;
+				case 3:
+					//remove
+					break;
+				}
+			}
+		}
+	};
+
 	class spawn_mob_h : public vhandler
 	{
 		void spawn_mob_h::handle(packet recv)
@@ -621,7 +658,7 @@ namespace net
 			char team = recv.readbyte();
 			mob toadd = app.getui()->getprovider()->loadmob(id);
 			toadd.setinfo(oid, pos, pos, stance, fh, effect, fadein, team);
-			app.getui()->getfield()->getmap()->addmob(oid, toadd);
+			app.getui()->getfield()->getmapobjects()->addmob(oid, toadd);
 		}
 	};
 
@@ -629,8 +666,12 @@ namespace net
 	{
 		void spawn_mob_c_h::handle(packet recv)
 		{
-			bool aggro = recv.readbyte() == 2;
+			char aggro = recv.readbyte();
 			int oid = recv.readint();
+			if (aggro == 0)
+			{
+				return;
+			}
 			bool control = recv.readbool();
 			int id = recv.readint();
 			vector2d pos = recv.readpoint();
@@ -644,6 +685,9 @@ namespace net
 			}
 			bool fadein = recv.readbool();
 			char team = recv.readbyte();
+			mob toadd = app.getui()->getprovider()->loadmob(id);
+			toadd.setinfo(oid, pos, pos, stance, fh, effect, fadein, team);
+			app.getui()->getfield()->getmapobjects()->addmob(oid, toadd);
 		}
 	};
 
@@ -672,10 +716,10 @@ namespace net
 			int mapid = recv.readint();
 			char portalid = recv.readbyte();
 			long timestamp = recv.readlong();
-			if (channel == app.getui()->getfield()->channelid)
+			if (channel == app.getui()->getfield()->getchannel())
 			{
 				app.getui()->getprovider()->clearcache(CM_MAP);
-				app.getui()->getfield()->changemap(app.getui()->getprovider()->loadmap(mapid), portalid);
+				app.getui()->getfield()->setfield(app.getui()->getprovider(), mapid, portalid);
 			}
 			else
 			{
@@ -716,6 +760,74 @@ namespace net
 		}
 	};
 
+	class show_mob_hp_h : public vhandler
+	{
+		void show_mob_hp_h::handle(packet recv)
+		{
+			int oid = recv.readint();
+			char hppercent = recv.readbyte();
+			app.getui()->getfield()->getmapobjects()->sendmobhp(oid, hppercent);
+		}
+	};
+
+	class kill_mob_h : public vhandler
+	{
+		void kill_mob_h::handle(packet recv)
+		{
+			int oid = recv.readint();
+			int animation = recv.readint();
+			app.getui()->getfield()->getmapobjects()->killmob(oid, animation);
+		}
+	};
+
+	class drop_item_from_mapobject_h : public vhandler
+	{
+		void drop_item_from_mapobject_h::handle(packet recv)
+		{
+			char mod = recv.readbyte();
+			int oid = recv.readint();
+			bool meso = recv.readbool();
+			int itemid = recv.readint();
+			int owner = recv.readint();
+			char pickuptype = recv.readbyte();
+			vector2d dropto = recv.readpoint();
+			vector2d dropfrom;
+			recv.readint();
+			if (mod != 2)
+			{
+				dropfrom = recv.readpoint();
+				recv.readshort();
+			}
+			else
+			{
+				dropfrom = dropto;
+			}
+
+			if (!meso)
+			{
+				long expire = recv.readlong();
+			}
+			bool playerdrop = recv.readbool();
+			
+			itemdrop drop = itemdrop(app.getui()->getprovider()->loaditemicon(itemid, meso), dropfrom, dropto, oid, itemid, owner, meso, pickuptype, playerdrop);
+			app.getui()->getfield()->getmapobjects()->additemdrop(oid, drop);
+		}
+	};
+
+	class remove_mapitem_h : public vhandler
+	{
+		void remove_mapitem_h::handle(packet recv)
+		{
+			char anim = recv.readbyte();
+			int oid = recv.readint();
+			if (anim > 1)
+			{
+				int cid = recv.readint();
+			}
+			app.getui()->getfield()->getmapobjects()->removedrop(oid);
+		}
+	};
+
 	packethandler::packethandler()
 	{
 		handlers.insert(make_pair(LOGIN_RESULT, unique_ptr<vhandler>(new login_result_h())));
@@ -729,6 +841,7 @@ namespace net
 		handlers.insert(make_pair(PING, unique_ptr<vhandler>(new ping_h())));
 		handlers.insert(make_pair(SHOW_STATUS_INFO, unique_ptr<vhandler>(new unhandled())));
 		handlers.insert(make_pair(WARP_TO_MAP, unique_ptr<vhandler>(new warp_to_map_h())));
+		handlers.insert(make_pair(MODIFY_INVENTORY, unique_ptr<vhandler>(new modify_inventory_h())));
 		handlers.insert(make_pair(STATS_CHANGED, unique_ptr<vhandler>(new stats_changed_h())));
 		handlers.insert(make_pair(UPDATE_SKILLS, unique_ptr<vhandler>(new update_skills_h())));
 		handlers.insert(make_pair(MEMO_RESULT, unique_ptr<vhandler>(new memo_result_h())));
@@ -738,8 +851,12 @@ namespace net
 		handlers.insert(make_pair(FAMILY_PRIV_LIST, unique_ptr<vhandler>(new family_plist_h())));
 		handlers.insert(make_pair(CHARINFO, unique_ptr<vhandler>(new charinfo_h())));
 		handlers.insert(make_pair(SPAWN_MOB, unique_ptr<vhandler>(new spawn_mob_h())));
+		handlers.insert(make_pair(KILL_MOB, unique_ptr<vhandler>(new kill_mob_h)));
 		handlers.insert(make_pair(SPAWN_MOB_C, unique_ptr<vhandler>(new spawn_mob_c_h())));
+		handlers.insert(make_pair(SHOW_MOB_HP, unique_ptr<vhandler>(new show_mob_hp_h)));
 		handlers.insert(make_pair(SPAWN_NPC, unique_ptr<vhandler>(new spawn_npc_h())));
+		handlers.insert(make_pair(DROP_ITEM_FROMOBJECT, unique_ptr<vhandler>(new drop_item_from_mapobject_h())));
+		handlers.insert(make_pair(REMOVE_MAPITEM, unique_ptr<vhandler>(new remove_mapitem_h())));
 		handlers.insert(make_pair(KEYMAP, unique_ptr<vhandler>(new keymap_h())));
 		handlers.insert(make_pair(CLOCK, unique_ptr<vhandler>(new clock_h())));
 		handlers.insert(make_pair(SPAWN_PET, unique_ptr<vhandler>(new unhandled())));

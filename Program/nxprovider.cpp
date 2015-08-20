@@ -58,10 +58,6 @@ namespace data
 
 	nxprovider::~nxprovider() 
 	{
-		clearcache(CM_LOGIN);
-		clearcache(CM_MAP);
-		clearcache(CM_SYS);
-
 		for (map<dwfonts, IDWriteTextFormat*>::iterator fnit = fonts.begin(); fnit != fonts.end(); ++fnit)
 		{
 			fnit->second->Release();
@@ -177,6 +173,97 @@ namespace data
 		ret.second.push_back(loadtexture(source.resolve("1/1")));
 		ret.second.push_back(loadtexture(source.resolve("1/2")));
 		return ret;
+	}
+
+	texture nxprovider::loaditemicon(int itemid, bool meso)
+	{
+		setcmode(CM_SYS);
+
+		texture ret;
+
+		if (meso)
+		{
+
+		}
+		else
+		{
+			bool equip = itemid < 2000000;
+			string category = getitemcategory(itemid);
+
+			if (equip)
+			{
+				nx::view_file("Character");
+				node basenode = nx::nodes["Character"].resolve(category);
+				ret = loadtexture(basenode.resolve("0" + to_string(itemid) + ".img/info/iconRaw"));
+				nx::unview_file("Character");
+			}
+			else
+			{
+				nx::view_file("Item");
+				node basenode = nx::nodes["Item"].resolve(category + "/0" + to_string(itemid / 10000) + ".img");
+				ret = loadtexture(basenode.resolve("0" + to_string(itemid) + "/info/iconRaw"));
+				nx::unview_file("Item");
+			}
+		}
+
+		unlock();
+		return ret;
+	}
+
+	string nxprovider::getitemcategory(int itemid)
+	{
+		switch (itemid / 1000000)
+		{
+		case 1:
+			return getequipcategory(itemid);
+		case 2:
+			return "Consume";
+		case 3:
+			return "Install";
+		case 4:
+			return "Etc";
+		case 5:
+			return "Cash";
+		}
+	}
+
+	string nxprovider::getequipcategory(int itemid)
+	{
+		int prefix = itemid / 10000;
+		switch (prefix)
+		{
+		case 100:
+			return "Cap";
+		case 101:
+			return "Accessory";
+		case 102:
+			return "Accessory";
+		case 103:
+			return "Accessory";
+		case 104:
+			return "Coat";
+		case 105:
+			return "Longcoat";
+		case 106:
+			return "Pants";
+		case 107:
+			return "Shoes";
+		case 108:
+			return "Glove";
+		case 109:
+			return "Shield";
+		case 110:
+			return "Cape";
+		default:
+			if (prefix >= 130 && prefix <= 170)
+			{
+				return "Weapon";
+			}
+			else
+			{
+				return "";
+			}
+		}
 	}
 
 	void nxprovider::setcmode(cachemode cm)
@@ -400,7 +487,6 @@ namespace data
 		vector<background> backgrounds;
 		vector<background> foregrounds;
 		map<char, portal> portals;
-		map<short, struct foothold> footholds;
 		string mapdesc;
 		string mapname;
 		string streetname;
@@ -419,35 +505,7 @@ namespace data
 
 		node bgnodes = mapdata.resolve("back");
 
-		nx::view_file("Back");
-		node back = nx::nodes["Back"].resolve("Back/");
-
-		for (node backnode = bgnodes.begin(); backnode != bgnodes.end(); backnode++)
-		{
-			string bS = backnode.resolve("bS").get_string();
-			if (!bS.empty())
-			{
-				char layer = static_cast<char>(stoi(backnode.name()));
-				bgtype type = static_cast<bgtype>(backnode.resolve("type").get_integer());
-				bool ani = backnode.resolve("ani").get_bool();
-				bool f = backnode.resolve("f").get_bool();
-
-				node spritenode = back.resolve(bS + ".img/" + ((ani) ? "ani/" : "back/") + to_string(backnode.resolve("no").get_integer()));
-
-				vector2d pos = vector2d(backnode.resolve("x").get_integer(), backnode.resolve("y").get_integer());
-				vector2d rpos = vector2d(backnode.resolve("rx").get_integer(), backnode.resolve("ry").get_integer());
-				vector2d cpos = vector2d(backnode.resolve("cx").get_integer(), backnode.resolve("cy").get_integer());
-				byte alpha = static_cast<byte>(backnode.resolve("a").get_integer());
-
-				background bgobj = background(loadanimation(spritenode), type, f, pos, rpos, cpos, mapwalls, mapborders, alpha);
-
-				if (backnode.resolve("front").get_bool())
-					foregrounds.push_back(bgobj);
-				else
-					backgrounds.push_back(bgobj);
-			}
-		}
-		nx::unview_file("Back");
+		
 
 		node portalnodes = mapdata.resolve("portal");
 		for (node portalnd = portalnodes.begin(); portalnd != portalnodes.end(); portalnd++)
@@ -478,22 +536,23 @@ namespace data
 		}
 
 		node fhnodes = mapdata.resolve("foothold");
-		for (node basef = fhnodes.begin(); basef != fhnodes.end(); basef++)
+		footholdtree footholds(fhnodes);
+
+		/*for (node basef = fhnodes.begin(); basef != fhnodes.end(); basef++)
 		{
 			for (node midf = basef.begin(); midf != basef.end(); midf++)
 			{
 				for (node lastf = midf.begin(); lastf != midf.end(); lastf++)
 				{
-					short fid = (short)stoi(lastf.name());
-					struct foothold fh;
-					fh.prev = (short)lastf.resolve("prev").get_integer();
-					fh.next = (short)lastf.resolve("next").get_integer();
-					fh.horizontal = vector2d((int)lastf.resolve("x1").get_integer(), (int)lastf.resolve("x2").get_integer());
-					fh.vertical = vector2d((int)lastf.resolve("y1").get_integer(), (int)lastf.resolve("y2").get_integer());
-					footholds[fid] = fh;
+					short fid = static_cast<short>(stoi(lastf.name()));
+					short prev = static_cast<short>(lastf.resolve("prev").get_integer());
+					short next = static_cast<short>(lastf.resolve("next").get_integer());
+					vector2d horizontal = vector2d((int)lastf.resolve("x1").get_integer(), (int)lastf.resolve("x2").get_integer());
+					vector2d vertical = vector2d((int)lastf.resolve("y1").get_integer(), (int)lastf.resolve("y2").get_integer());
+					footholds.addfoothold(fid, prev, next, horizontal, vertical);
 				}
 			}
-		}
+		}*/
 
 
 		nx::view_file("Obj");
@@ -538,7 +597,7 @@ namespace data
 		nx::unview_file("Obj");
 		nx::unview_file("Tile");
 		unlock();
-		return maplemap(id, tilelayers, objlayers, backgrounds, foregrounds, portals, footholds, fieldlimit, cloud, bgm, mapdesc, mapname, streetname, mapmark, swim, town, hideminimap, mapwalls, mapborders);
+		return maplemap(id, tilelayers, objlayers, backgrounds, foregrounds, portals, fieldlimit, cloud, bgm, mapdesc, mapname, streetname, mapmark, swim, town, hideminimap, mapwalls, mapborders);
 	}
 
 	void nxprovider::initbodyinfo()

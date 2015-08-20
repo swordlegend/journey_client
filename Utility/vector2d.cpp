@@ -54,6 +54,12 @@ namespace util
 		return static_cast<int>(std::sqrt(std::pow(a, 2) + std::pow(b, 2)));
 	}
 
+	int vector2d::center()
+	{
+		int delta = (a > b) ? a - b : b - a;
+		return static_cast<int>(delta / 2);
+	}
+
 	bool vector2d::contains(int p)
 	{
 		return p >= a && p <= b;

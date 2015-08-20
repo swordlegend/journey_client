@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // This file is part of the Journey MMORPG client                           //
-// Copyright Â© 2015 SYJourney                                               //
+// Copyright © 2015 SYJourney                                               //
 //                                                                          //
 // This program is free software: you can redistribute it and/or modify     //
 // it under the terms of the GNU Affero General Public License as           //
@@ -83,16 +83,17 @@ namespace gameplay
 	{
 		if (step == GST_GAME)
 		{
-			view.update(vector2d(408, (624 / 1.5)) - playerchar.getposition());
+			view.update(playerchar.getposition());
 
 			backgrounds.drawbackgrounds(target, view.getposition());
-			for (int i = 0; i < 5; i++)
-			{
-				maplayers[i].draw(target, view.getposition());
-			}
+			maplayers[0].draw(target, view.getposition());
+			maplayers[1].draw(target, view.getposition());
+			maplayers[2].draw(target, view.getposition());
+			maplayers[3].draw(target, view.getposition());
 			map_objects.draw(target, view.getposition());
 			playerchar.draw(target, view.getposition());
 			portals.draw(target, view.getposition());
+			maplayers[4].draw(target, view.getposition());
 			maplayers[5].draw(target, view.getposition());
 			maplayers[6].draw(target, view.getposition());
 			maplayers[7].draw(target, view.getposition());
@@ -196,7 +197,7 @@ namespace gameplay
 		vector2d startpos = portals.getspawnpoint(pid);
 		playerchar.setfh(&footholds);
 		playerchar.setposition(startpos);
-		view.setposition(vector2d(816 / 2, (624 / 1.5)) - startpos);
+		view.setposition(startpos);
 		view.setbounds(map_info.getwalls(), map_info.getborders());
 
 		step = GST_GAME;

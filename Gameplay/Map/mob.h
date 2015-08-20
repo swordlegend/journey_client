@@ -18,6 +18,7 @@
 #pragma once
 #include "stdfax.h"
 #include "animation.h"
+#include "attackinfo.h"
 
 using namespace std;
 using namespace util;
@@ -32,6 +33,8 @@ namespace gameplay
 		int oid;
 		string name;
 		short level;
+		short knockback;
+		char hppercent;
 		short speed;
 		vector2d pos;
 		vector2d walls;
@@ -42,13 +45,22 @@ namespace gameplay
 		char effect;
 		bool fadein;
 		char team;
+		float hspeed;
+		float vspeed;
+		float fx;
+		float fy;
 	public:
 		mob() {}
 		~mob() {}
 		mob(map<string, animation>, string, short, short);
 		void setinfo(int, vector2d, vector2d, char, short, char, bool, char);
-		void update();
+		bool update();
 		void draw(ID2D1HwndRenderTarget*, vector2d);
+		void damage(attackinfo*, int);
+		void showhp(char);
+		void setstate(string st) { state = st; }
+		bool isalive() { return state != "die1"; }
+		vector2d getposition() { return pos; }
 	};
 }
 

@@ -29,6 +29,8 @@ namespace gameplay
 
 	void camera::update(vector2d playerpos)
 	{
+		playerpos = vector2d(408, 416) - playerpos;
+
 		if (playerpos.x() - static_cast<int>(posx) == 0 && playerpos.y() - static_cast<int>(posy) == 0)
 		{
 			return;
@@ -57,6 +59,8 @@ namespace gameplay
 
 	void camera::setposition(vector2d pos)
 	{
+		pos = vector2d(408, 416) - pos;
+
 		posx = static_cast<float>(pos.x());
 		posy = static_cast<float>(pos.y());
 	}

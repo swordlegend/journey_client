@@ -26,6 +26,7 @@
 #include "mob.h"
 #include "charset.h"
 #include "portal.h"
+#include "footholdtree.h"
 
 using namespace nl;
 using namespace io;
@@ -55,6 +56,8 @@ namespace data
 		void addhairstyle(int);
 		void addface(int);
 		void addclothes(int);
+		string getitemcategory(int);
+		string getequipcategory(int);
 		map<char, charsprites> bodytypes;
 		map<int, charsprites> faces;
 		map<int, charsprites> hairstyles;
@@ -69,6 +72,7 @@ namespace data
 		void init(IWICImagingFactory*, IDWriteFactory*);
 		texture loadtexture(node);
 		animation loadanimation(node);
+		texture loaditemicon(int, bool);
 		maplemap loadmap(int);
 		npc loadnpc(int);
 		mob loadmob(int);

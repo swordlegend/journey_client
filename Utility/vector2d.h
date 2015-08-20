@@ -33,6 +33,7 @@ namespace util
 		int x();
 		int y();
 		int length();
+		int center();
 		bool contains(int);
 		bool straight();
 		vector2d operator + (vector2d);

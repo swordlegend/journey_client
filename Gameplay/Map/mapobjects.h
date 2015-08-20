@@ -20,6 +20,7 @@
 #include "npc.h"
 #include "mob.h"
 #include "reactor.h"
+#include "itemdrop.h"
 
 namespace gameplay
 {
@@ -27,7 +28,8 @@ namespace gameplay
 	{
 		MOT_NPC,
 		MOT_MOB,
-		MOT_REACTOR
+		MOT_REACTOR,
+		MOT_DROP
 	};
 
 	class mapobjects
@@ -38,14 +40,20 @@ namespace gameplay
 		void clear();
 		void draw(ID2D1HwndRenderTarget*, vector2d);
 		void update();
+		void sendattack(attackinfo*, int, pair<vector2d, vector2d>);
+		void sendmobhp(int, char);
+		void killmob(int, int);
+		void removedrop(int);
 		void addnpc(int, npc);
 		void addmob(int, mob);
 		void addreactor(int, reactor);
+		void additemdrop(int, itemdrop);
 	private:
 		map<int, mmotype> objects;
 		map<int, npc> npcs;
 		map<int, mob> mobs;
 		map<int, reactor> reactors;
+		map<int, itemdrop> drops;
 		SRWLOCK objlock;
 	};
 }
