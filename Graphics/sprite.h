@@ -29,6 +29,7 @@ namespace graphics
 		~sprite() {}
 		void draw(ID2D1HwndRenderTarget*, vector2d parentpos);
 		void update() { anim.update(); }
+		void setframe(byte fr) { anim.setframe(fr); }
 		void setposition(vector2d pos) { position = pos; }
 		void togglevisible() { visible = !visible; }
 		void flip() { flipped = !flipped; }

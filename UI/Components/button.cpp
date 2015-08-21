@@ -19,9 +19,12 @@
 
 namespace io
 {
-	button::button(std::map<std::string, texture> s, int x, int y)
+	button::button(node src, int x, int y)
 	{
-		sprites = s;
+		sprites["pressed"] = texture(src.resolve("pressed/0"));
+		sprites["mouseOver"] = texture(src.resolve("mouseOver/0"));
+		sprites["normal"] = texture(src.resolve("normal/0"));
+		sprites["disabled"] = texture(src.resolve("disabled/0"));
 		position = vector2d(x, y);
 		state = "normal";
 		bttype = BTT_REGULAR;
@@ -54,21 +57,23 @@ namespace io
 
 	void button::draw(ID2D1HwndRenderTarget* target, vector2d parentpos)
 	{
+		vector2d absp = position + parentpos;
+
 		if (bttype == BTT_ONESPRITE)
 		{
 			if (state == "normal")
 			{
-				sprites["normal"].draw(target, position + parentpos);
+				sprites["normal"].draw(absp);
 			}
 			else if (state == "pressed" || state == "mouseOver")
 			{
-				sprites["normal"].draw(target, position + parentpos);
-				sprites["select"].draw(target, position + parentpos);
+				sprites["normal"].draw(absp);
+				sprites["select"].draw(absp);
 			}
 		}
 		else if (bttype == BTT_REGULAR)
 		{
-			sprites[state].draw(target, position + parentpos);
+			sprites[state].draw(absp);
 		}
 	}
 

@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // This file is part of the Journey MMORPG client                           //
-// Copyright Â© 2015 SYJourney                                               //
+// Copyright © 2015 SYJourney                                               //
 //                                                                          //
 // This program is free software: you can redistribute it and/or modify     //
 // it under the terms of the GNU Affero General Public License as           //
@@ -82,6 +82,7 @@ namespace gameplay
 		void recalcstats(bool);
 		bool walking;
 		bool standing;
+		bool attacking;
 	public:
 		player();
 		~player();
@@ -97,6 +98,7 @@ namespace gameplay
 		void crouch(bool);
 		void sit(bool);
 		void move(movecode, bool);
+		bool attack(int);
 		void setexpression(char);
 		void updateskill(int, int, int, long);
 	};

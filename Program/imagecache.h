@@ -17,37 +17,39 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "stdfax.h"
-#include "icon.h"
+#include "bitmap.h"
 
-using namespace graphics;
+using namespace std;
+using namespace nl;
 
-namespace gameplay
+namespace program
 {
-	class itemdrop
+	enum imgcontext : char
+	{
+		ict_login,
+		ict_sys,
+		ict_map
+	};
+
+	class imagecache
 	{
 	public:
-		itemdrop(int, bool, vector2d, vector2d, int, int, char, bool);
-		itemdrop() {}
-		~itemdrop() {}
-		void draw(ID2D1HwndRenderTarget*, vector2d);
-		bool update();
-		void expire() { pickedup = true; }
+		imagecache() {}
+		~imagecache() {}
+		void init(IWICImagingFactory*);
+		void setmode(imgcontext);
+		void settarget(ID2D1HwndRenderTarget* trg) { target = trg; }
+		void unlock();
+		void clearcache(imgcontext);
+		void draw(imgcontext, size_t, D2D1_RECT_F, float);
+		pair<imgcontext, size_t> createimage(bitmap bmp);
 	private:
-		icon ico;
-		vector2d position;
-		vector2d destination;
-		vector2d borders;
-		int oid;
-		int itemid;
-		int owner;
-		bool meso;
-		char pickuptype;
-		float alpha;
-		bool playerdrop;
-		bool pickedup;
-		bool floating;
-		float vspeed;
-		float fy;
+		unique_ptr<IWICImagingFactory> imgfactory;
+		ID2D1HwndRenderTarget* target;
+		map<imgcontext, map<size_t, IWICBitmap*>> temp;
+		map<imgcontext, map<size_t, ID2D1Bitmap*>> cache;
+		imgcontext imgcon;
+		mutex modelock;
 	};
 }
 

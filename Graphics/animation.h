@@ -28,7 +28,7 @@ namespace graphics
 	{
 	public:
 		animation() {}
-		animation(map<byte, texture>, map<byte, short>, map<byte, pair<byte, byte>>);
+		animation(node);
 		~animation() {}
 		void draw(ID2D1HwndRenderTarget*, vector2d);
 		void draw(ID2D1HwndRenderTarget*, vector2d, float);

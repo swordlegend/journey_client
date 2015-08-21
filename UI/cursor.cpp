@@ -29,17 +29,17 @@ namespace io
 
 	cursor::~cursor(){}
 
-	void cursor::init(nxprovider* provider)
+	void cursor::init()
 	{
-		provider->setcmode(data::CM_SYS);
+		app.getimgcache()->setmode(ict_sys);
 		nl::nx::view_file("UI");
 		node cursornode = nl::nx::nodes["UI"].resolve("Basic.img/Cursor/");
 		for (mousestate i = MST_IDLE; i <= MST_RCLICK; i = (mousestate) (i + 1))
 		{
-			sprites[i] = provider->loadanimation(cursornode.resolve(to_string(i)));
+			sprites[i] = animation(cursornode.resolve(to_string(i)));
 		}
 		nl::nx::unview_file("UI");
-		provider->unlock();
+		app.getimgcache()->unlock();
 	}
 
 	void cursor::update(vector2d pos)

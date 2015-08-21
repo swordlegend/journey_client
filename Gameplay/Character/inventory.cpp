@@ -19,13 +19,9 @@
 
 namespace gameplay
 {
-	inventory::inventory() {}
-
-	inventory::~inventory() {}
-
-	inventory::inventory(char* s, map<short, mapleequip> eq, map<short, mapleequip> eqc, map<short, mapleequip> e, map<char, mapleitem> ui, map<char, mapleitem> si, map<char, mapleitem> ei, map<char, mapleitem> ci)
+	inventory::inventory(vector<char> slt, map<short, mapleequip> eq, map<short, mapleequip> eqc, map<short, mapleequip> e, map<char, mapleitem> ui, map<char, mapleitem> si, map<char, mapleitem> ei, map<char, mapleitem> ci)
 	{
-		slots = s;
+		slots = slt;
 		equipped = eq;
 		equippedcash = eqc;
 		equips = e;
@@ -35,13 +31,21 @@ namespace gameplay
 		cashitems = ci;
 	}
 
-	map<short, mapleequip>* inventory::getequipped()
+	void inventory::recalcstats()
 	{
-		return &equipped;
-	}
+		for (equipstat es = ES_STR; es <= ES_JUMP; es = static_cast<equipstat>(es + 1))
+		{
+			totalstats[es] = 0;
+		}
 
-	map<short, mapleequip>* inventory::getequippedcash()
-	{
-		return &equippedcash;
+		for (map<short, mapleequip>::iterator eqit = equipped.begin(); eqit != equipped.end(); ++eqit)
+		{
+			for (equipstat es = ES_STR; es <= ES_JUMP; es = static_cast<equipstat>(es + 1))
+			{
+				totalstats[es] += eqit->second.getstat(es);
+			}
+		}
+
+		wepmultiplier = 1.5f;
 	}
 }

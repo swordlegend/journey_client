@@ -55,6 +55,9 @@ namespace gameplay
 	{
 		vector2d absp = pos + parentpos;
 
+		//mapwalls = vector2d(pos.x(), pos.x() + 816);
+		//mapborders = vector2d(pos.y(), pos.y() + 624);
+
 		if (flipped)
 		{
 			target->SetTransform(

@@ -17,14 +17,13 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "uielement.h"
-#include "nxprovider.h"
 
 namespace io
 {
 	class worldselect : public uielement
 	{
 	public:
-		worldselect(nxprovider*, char, char*);
+		worldselect(char, char*);
 		~worldselect() {}
 		void buttonpressed(short);
 	private:

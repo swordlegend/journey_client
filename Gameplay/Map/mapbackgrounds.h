@@ -17,14 +17,14 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "stdfax.h"
-#include "nxprovider.h"
+#include "background.h"
 
 namespace gameplay
 {
 	class mapbackgrounds
 	{
 	public:
-		mapbackgrounds(nxprovider* provider, nl::node, vector2d, vector2d);
+		mapbackgrounds(nl::node, vector2d, vector2d);
 		mapbackgrounds() {}
 		~mapbackgrounds() {}
 		void drawbackgrounds(ID2D1HwndRenderTarget*, vector2d);

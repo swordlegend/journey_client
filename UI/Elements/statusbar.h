@@ -17,9 +17,11 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "uielement.h"
-#include "nxprovider.h"
 #include "maplestats.h"
+#include "charset.h"
 #include "uibar.h"
+
+using namespace gameplay;
 
 namespace io
 {
@@ -33,7 +35,7 @@ namespace io
 		charset statset;
 		charset lvset;
 	public:
-		statusbar(nxprovider*, maplestats*);
+		statusbar(maplestats*);
 		~statusbar() {}
 		void draw(ID2D1HwndRenderTarget*);
 		void update();

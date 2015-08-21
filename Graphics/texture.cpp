@@ -17,7 +17,7 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "texture.h"
-#include "nxprovider.h"
+#include "Journey.h"
 
 namespace graphics
 {
@@ -25,68 +25,55 @@ namespace graphics
 	{
 		origin = vector2d();
 		dimension = vector2d();
-		bitmap = 0;
 	}
 
-	texture::texture(pair<cachemode, size_t> src, vector2d org, vector2d dim)
+	texture::texture(node src)
 	{
-		source = src;
-		origin = org;
-		dimension = dim;
-		bitmap = 0;
+		bitmap bmp = src.get_bitmap();
+		source = app.getimgcache()->createimage(bmp);
+		dimension = vector2d(bmp.width(), bmp.height());
+		node originnode = src["origin"];
+		if (originnode.data_type() == nl::node::type::vector)
+			origin = vector2d(originnode.x(), originnode.y());
+		else
+			origin = vector2d();
 	}
 
-	texture::~texture()
+	void texture::draw(vector2d position)
 	{
-		if (bitmap)
+		draw(position, 1.0f);
+	}
+
+	void texture::draw(vector2d position, float alpha)
+	{
+		draw(position, vector2d(), alpha);
+	}
+
+	void texture::draw(vector2d position, vector2d stretch)
+	{
+		draw(position, stretch, 1.0f);
+	}
+
+	void texture::draw(vector2d position, vector2d stretch, float alpha)
+	{
+		int w = stretch.x();
+		if (w == 0)
+			w = dimension.x();
+
+		int h = stretch.y();
+		if (h == 0)
+			h = dimension.y();
+
+		vector2d absp = position - origin;
+
+		if (absp.x() <= 816 && absp.y() <= 624 && absp.x() > -dimension.x() && absp.y() > -dimension.y())
 		{
-			bitmap->Release();
-		}
-	}
+			D2D1_RECT_F r = { static_cast<float>(absp.x()),
+				static_cast<float>(absp.y()),
+				static_cast<float>(absp.x() + w),
+				static_cast<float>(absp.y() + h) };
 
-	void texture::draw(ID2D1HwndRenderTarget* target, vector2d position)
-	{
-		draw(target, position, 1.0f);
-	}
-
-	void texture::draw(ID2D1HwndRenderTarget* target, vector2d position, float alpha)
-	{
-		draw(target, position, vector2d(), alpha);
-	}
-
-	void texture::draw(ID2D1HwndRenderTarget* target, vector2d position, vector2d stretch)
-	{
-		draw(target, position, stretch, 1.0f);
-	}
-
-	void texture::draw(ID2D1HwndRenderTarget* target, vector2d position, vector2d stretch, float alpha)
-	{
-		if (!bitmap)
-		{
-			target->CreateBitmapFromWicBitmap(data::getbitmap(source.first, source.second), &bitmap);
-		}
-
-		if (bitmap)
-		{
-			int w = stretch.x();
-			if (w == 0)
-				w = dimension.x();
-
-			int h = stretch.y();
-			if (h == 0)
-				h = dimension.y();
-
-			vector2d absp = position - origin;
-
-			if (absp.x() <= 816 && absp.y() <= 624 && absp.x() > -dimension.x() && absp.y() > -dimension.y())
-			{
-				D2D1_RECT_F r = { static_cast<float>(absp.x()),
-					static_cast<float>(absp.y()),
-					static_cast<float>(absp.x() + w),
-					static_cast<float>(absp.y() + h) };
-
-				target->DrawBitmap(bitmap, r, alpha);
-			}
+			app.getimgcache()->draw(source.first, source.second, r, alpha);
 		}
 	}
 

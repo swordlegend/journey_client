@@ -29,6 +29,20 @@ using namespace util;
 
 namespace io
 {
+	enum uielements : char
+	{
+		UI_LOGIN,
+		UI_LOGINNOTICE,
+		UI_LOGINWAIT,
+		UI_WORLDSELECT,
+		UI_CHARSEL,
+		UI_CHARDELCONFIRM,
+		UI_STATUSBAR,
+		UI_QUESTS,
+		UI_INVENTORY,
+		UI_EQUIPS
+	};
+
 	enum buttonid : short
 	{
 		BT_LOGIN = 0,

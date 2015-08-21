@@ -17,7 +17,6 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "vhandler.h"
-#include "nxprovider.h"
 #include "ui.h"
 #include "maplechar.h"
 #include "maplelook.h"

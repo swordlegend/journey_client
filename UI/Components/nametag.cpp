@@ -40,23 +40,23 @@ namespace io
 
 		if (!active)
 		{
-			tag.first[0].draw(target, bgpos);
+			tag.first[0].draw(bgpos);
 			char i;
 			for (i = 0; i < name.length() / 3; i++)
 			{
-				tag.first[1].draw(target, bgpos + vector2d(8 + 9 * i, 0));
+				tag.first[1].draw(bgpos + vector2d(8 + 9 * i, 0));
 			}
-			tag.first[2].draw(target, bgpos + vector2d(8 + 9 * i, 0));
+			tag.first[2].draw(bgpos + vector2d(8 + 9 * i, 0));
 		}
 		else
 		{
-			tag.second[0].draw(target, bgpos);
+			tag.second[0].draw(bgpos);
 			char i;
 			for (i = 0; i < name.length() / 3; i++)
 			{
-				tag.second[1].draw(target, bgpos + vector2d(8 + 9 * i, 0));
+				tag.second[1].draw(bgpos + vector2d(8 + 9 * i, 0));
 			}
-			tag.second[2].draw(target, bgpos + vector2d(8 + 9 * i, 0));
+			tag.second[2].draw(bgpos + vector2d(8 + 9 * i, 0));
 		}
 
 		D2D1_RECT_F layoutRect = D2D1::RectF(

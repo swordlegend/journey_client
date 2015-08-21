@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // This file is part of the Journey MMORPG client                           //
-// Copyright Â© 2015 SYJourney                                               //
+// Copyright © 2015 SYJourney                                               //
 //                                                                          //
 // This program is free software: you can redistribute it and/or modify     //
 // it under the terms of the GNU Affero General Public License as           //
@@ -43,6 +43,7 @@ namespace gameplay
 		movestate = MC_NONE;
 		standing = true;
 		nofriction = false;
+		attacking = false;
 		fleft = true;
 		look.setfleft(true);
 	}
@@ -109,7 +110,12 @@ namespace gameplay
 
 	void player::update()
 	{
-		look.update();
+		bool anidone = look.update();
+
+		if (anidone && attacking)
+		{
+			attacking = false;
+		}
 
 		float fspeed = ((float)speed / 100) * walkSpeed;
 		float fjump = ((float)jump / 100);
@@ -123,7 +129,7 @@ namespace gameplay
 
 		if (!nofriction)
 		{
-			hspeed -= (standing)? 0.08 : 0.05;
+			hspeed -= (standing)? 0.08f : 0.05f;
 			if (hspeed < 0)
 				hspeed = 0;
 		}
@@ -180,7 +186,7 @@ namespace gameplay
 
 	void player::crouch(bool keydown)
 	{
-		if (standing)
+		if (standing && !attacking)
 		{
 			if (keydown)
 			{
@@ -199,6 +205,9 @@ namespace gameplay
 	void player::move(movecode type, bool keydown)
 	{
 		short newstate = MC_NONE;
+
+		if (attacking)
+			return;
 
 		if (keydown)
 		{
@@ -256,6 +265,20 @@ namespace gameplay
 				newstate = movestate ^ type;
 		}
 		movestate = newstate;
+	}
+
+	bool player::attack(int skill)
+	{
+		if (look.getstate() != "stabO1")
+		{
+			look.setstate("stabO1");
+			attacking = true;
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	void player::recalcstats(bool param)

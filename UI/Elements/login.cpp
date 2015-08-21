@@ -21,30 +21,30 @@
 
 namespace io
 {
-	login::login(nxprovider* provider)
+	login::login()
 	{
-		provider->setcmode(CM_LOGIN);
+		app.getimgcache()->setmode(ict_login);
 		nl::nx::view_file("UI");
 
 		node title = nl::nx::nodes["UI"].resolve("Login.img/Title/");
 		node common = nl::nx::nodes["UI"].resolve("Login.img/Common/");
 
-		sprites.push_back(sprite(provider->loadanimation(title.resolve("11")), vector2d(410, 300)));
-		sprites.push_back(sprite(provider->loadanimation(title.resolve("35")), vector2d(410, 260)));
-		sprites.push_back(sprite(provider->loadanimation(title.resolve("Logo")), vector2d(410, 130)));
-		sprites.push_back(sprite(provider->loadanimation(title.resolve("signboard")), vector2d(410, 300)));
-		sprites.push_back(sprite(provider->loadanimation(common.resolve("frame")), vector2d(400, 290)));
+		sprites.push_back(sprite(animation(title.resolve("11")), vector2d(410, 300)));
+		sprites.push_back(sprite(animation(title.resolve("35")), vector2d(410, 260)));
+		sprites.push_back(sprite(animation(title.resolve("Logo")), vector2d(410, 130)));
+		sprites.push_back(sprite(animation(title.resolve("signboard")), vector2d(410, 300)));
+		sprites.push_back(sprite(animation(common.resolve("frame")), vector2d(400, 290)));
 
-		buttons[BT_LOGIN] = button(provider->loadbutton(title.resolve("BtLogin")), 475, 248);
-		buttons[BT_NEW] = button(provider->loadbutton(title.resolve("BtNew")), 309, 320);
-		buttons[BT_HOMEPAGE] = button(provider->loadbutton(title.resolve("BtHomePage")), 382, 320);
-		buttons[BT_PWDLOST] = button(provider->loadbutton(title.resolve("BtPasswdLost")), 470, 300);
-		buttons[BT_QUIT] = button(provider->loadbutton(title.resolve("BtQuit")), 455, 320);
-		buttons[BT_LOGINLOST] = button(provider->loadbutton(title.resolve("BtLoginIDLost")), 395, 300);
-		buttons[BT_SAVEID] = button(provider->loadbutton(title.resolve("BtLoginIDSave")), 325, 300);
+		buttons[BT_LOGIN] = button(title.resolve("BtLogin"), 475, 248);
+		buttons[BT_NEW] = button(title.resolve("BtNew"), 309, 320);
+		buttons[BT_HOMEPAGE] = button(title.resolve("BtHomePage"), 382, 320);
+		buttons[BT_PWDLOST] = button(title.resolve("BtPasswdLost"), 470, 300);
+		buttons[BT_QUIT] = button(title.resolve("BtQuit"), 455, 320);
+		buttons[BT_LOGINLOST] = button(title.resolve("BtLoginIDLost"), 395, 300);
+		buttons[BT_SAVEID] = button(title.resolve("BtLoginIDSave"), 325, 300);
 
 		bool saveid = config.accsaved();
-		saveidcheck = sprite(provider->loadanimation(title.resolve("check")), vector2d(313, 304));
+		saveidcheck = sprite(animation(title.resolve("check")), vector2d(313, 304));
 
 		string defaultacc;
 		if (saveid)
@@ -52,11 +52,11 @@ namespace io
 		else
 			defaultacc = "";
 
-		textfields[TXT_ACC] = textfield(provider->getfont(DWF_LEFT), TXC_WHITE, defaultacc, vector2d(315, 249), 12);
-		textfields[TXT_ACC].setbg(provider->loadtexture(title.resolve("ID")), -5, 0);
+		textfields[TXT_ACC] = textfield(app.getfonts()->getfont(DWF_LEFT), TXC_WHITE, defaultacc, vector2d(315, 249), 12);
+		textfields[TXT_ACC].setbg(texture(title.resolve("ID")), -5, 0);
 
-		textfields[TXT_PASS] = textfield(provider->getfont(DWF_LEFT), TXC_WHITE, "", vector2d(315, 275), 12);
-		textfields[TXT_PASS].setbg(provider->loadtexture(title.resolve("PW")), -5, 0);
+		textfields[TXT_PASS] = textfield(app.getfonts()->getfont(DWF_LEFT), TXC_WHITE, "", vector2d(315, 275), 12);
+		textfields[TXT_PASS].setbg(texture(title.resolve("PW")), -5, 0);
 
 		if (!saveid)
 		{
@@ -70,7 +70,7 @@ namespace io
 		}
 
 		nl::nx::unview_file("UI");
-		provider->unlock();
+		app.getimgcache()->unlock();
 		position = vector2d(0, 0);
 		dimensions = vector2d(800, 600);
 		active = true;

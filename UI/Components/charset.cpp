@@ -17,18 +17,24 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "charset.h"
-#include "nxprovider.h"
 
 namespace io
 {
-	charset::charset(map<char, texture> ch)
+	charset::charset(node src)
 	{
-		characters = ch;
+		for (node sub = src.begin(); sub != src.end(); sub++)
+		{
+			char c = sub.name()[0];
+			if (c == '\\')
+				c = '/';
+
+			characters[c] = texture(sub);
+		}
 	}
 
-	int charset::draw(ID2D1HwndRenderTarget* target,char c, vector2d pos)
+	int charset::draw(char c, vector2d pos)
 	{
-		characters[c].draw(target, pos);
+		characters[c].draw(pos);
 		return getw(c);
 	}
 
@@ -37,7 +43,7 @@ namespace io
 		return characters[c].getdimension().x();
 	}
 
-	int charset::draw(ID2D1HwndRenderTarget* target, string numstr, alignment align, vector2d pos)
+	int charset::draw(string numstr, alignment align, vector2d pos)
 	{
 		char length = numstr.length();
 		int shift = 0;
@@ -48,21 +54,21 @@ namespace io
 			for (char i = 0; i < length; i++)
 			{
 				shift += getw(numstr[i]);
-				draw(target, numstr[i], pos + vector2d(shift, 0));
+				draw(numstr[i], pos + vector2d(shift, 0));
 			}
 			break;
 		case cha_right:
 			for (char i = length - 1; i >= 0; i--)
 			{
 				shift += getw(numstr[i]);
-				draw(target, numstr[i], pos - vector2d(shift, 0));
+				draw(numstr[i], pos - vector2d(shift, 0));
 			}
 			break;
 		}
 		return shift;
 	}
 
-	int charset::draw(ID2D1HwndRenderTarget* target, string numstr, char space, alignment align, vector2d pos)
+	int charset::draw(string numstr, char space, alignment align, vector2d pos)
 	{
 		char length = numstr.length();
 		int shift = 0;
@@ -75,14 +81,14 @@ namespace io
 			for (char i = 0; i < length; i++)
 			{
 				shift += space;
-				draw(target, numstr[i], pos + vector2d(shift, 0));
+				draw(numstr[i], pos + vector2d(shift, 0));
 			}
 			break;
 		case cha_right:
 			for (char i = length - 1; i >= 0; i--)
 			{
 				shift += space;
-				draw(target, numstr[i], pos - vector2d(shift, 0));
+				draw(numstr[i], pos - vector2d(shift, 0));
 			}
 			break;
 		}

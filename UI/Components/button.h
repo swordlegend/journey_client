@@ -41,7 +41,7 @@ namespace io
 		string state;
 		char bttype;
 	public:
-		button(map<string, texture>, int, int);
+		button(node, int, int);
 		button(texture, texture, int, int);
 		button(int, int, int, int);
 		button() {}

@@ -20,10 +20,6 @@
 
 namespace gameplay
 {
-	mapleequip::mapleequip() {}
-
-	mapleequip::~mapleequip() {}
-
 	mapleequip::mapleequip(short ps, char typ, int id, bool cs, long uq, long expi, char slt, char lv, map<equipstat, short> sta, string own, short fl, char ilv, short iex, int vic)
 	{
 		pos = ps;

@@ -17,37 +17,34 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "stdfax.h"
-#include "icon.h"
+#include "maplelook.h"
 
-using namespace graphics;
+using namespace std;
+using namespace gameplay;
 
-namespace gameplay
+namespace program
 {
-	class itemdrop
+	class lookfactory
 	{
 	public:
-		itemdrop(int, bool, vector2d, vector2d, int, int, char, bool);
-		itemdrop() {}
-		~itemdrop() {}
-		void draw(ID2D1HwndRenderTarget*, vector2d);
-		bool update();
-		void expire() { pickedup = true; }
+		lookfactory() {}
+		~lookfactory() {}
+		void loadcharlook(maplelook*);
 	private:
-		icon ico;
-		vector2d position;
-		vector2d destination;
-		vector2d borders;
-		int oid;
-		int itemid;
-		int owner;
-		bool meso;
-		char pickuptype;
-		float alpha;
-		bool playerdrop;
-		bool pickedup;
-		bool floating;
-		float vspeed;
-		float fy;
+		void initbodyinfo();
+		void initfaceinfo();
+		void addbodytype(char);
+		void addhairstyle(int);
+		void addface(int);
+		void addclothes(int);
+		map<char, charsprites> bodytypes;
+		map<int, charsprites> faces;
+		map<int, charsprites> hairstyles;
+		map<int, charsprites> clothes;
+		map<string, map<char, short>> facedelays;
+		map<string, map<char, short>> bodydelays;
+		map<string, map<char, pair<string, char>>> bodyactions;
+		map<string, map<char, map<charlayers, map<string, vector2d>>>> bodyheadmap;
 	};
 }
 

@@ -54,9 +54,10 @@ namespace gameplay
 		short itemexp;
 		int vicious;
 	public:
-		mapleequip();
-		~mapleequip();
+		mapleequip() {}
+		~mapleequip() {}
 		mapleequip(short, char, int, bool, long, long, char, char, map<equipstat, short>,string, short, char, short, int);
+		short getstat(equipstat es) { return stats[es]; }
 	};
 }
 

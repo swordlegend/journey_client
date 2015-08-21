@@ -17,14 +17,13 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "uielement.h"
-#include "nxprovider.h"
 
 namespace io
 {
 	class loginwait : public uielement
 	{
 	public:
-		loginwait(nxprovider*);
+		loginwait();
 		~loginwait() {}
 	};
 }

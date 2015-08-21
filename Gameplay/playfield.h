@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // This file is part of the Journey MMORPG client                           //
-// Copyright Â© 2015 SYJourney                                               //
+// Copyright © 2015 SYJourney                                               //
 //                                                                          //
 // This program is free software: you can redistribute it and/or modify     //
 // it under the terms of the GNU Affero General Public License as           //
@@ -46,7 +46,7 @@ namespace gameplay
 		void draw(ID2D1HwndRenderTarget*);
 		void update();
 		void setplayer(player);
-		void setfield(nxprovider*, int, char);
+		void setfield(int, char);
 		void changechannel(char) {}
 		void setworldchannel(char wld, char chd) { worldid = wld; channelid = chd; }
 		bool moveup();

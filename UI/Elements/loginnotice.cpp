@@ -21,9 +21,9 @@
 
 namespace io
 {
-	loginnotice::loginnotice(nxprovider* provider, char param)
+	loginnotice::loginnotice(char param)
 	{
-		provider->setcmode(CM_LOGIN);
+		app.getimgcache()->setmode(ict_login);
 		nl::nx::view_file("UI");
 
 		node notice = nl::nx::nodes["UI"].resolve("Login.img/Notice/");
@@ -33,22 +33,22 @@ namespace io
 		{
 		case 16:
 			back = "backgrnd/1";
-			buttons[BT_LOGINBANOK] = button(provider->loadbutton(notice.resolve("BtYes")), 100, 100);
+			buttons[BT_LOGINBANOK] = button(notice.resolve("BtYes"), 100, 100);
 			break;
 		case 93:
 			back = "backgrnd/1";
-			buttons[BT_LOGINNOTICEOK] = button(provider->loadbutton(notice.resolve("BtYes")), 100, 100);
+			buttons[BT_LOGINNOTICEOK] = button(notice.resolve("BtYes"), 100, 100);
 			break;
 		default:
 			back = "backgrnd/0";
-			buttons[BT_LOGINNOTICEOK] = button(provider->loadbutton(notice.resolve("BtYes")), 100, 100);
+			buttons[BT_LOGINNOTICEOK] = button(notice.resolve("BtYes"), 100, 100);
 		}
 
-		sprites.push_back(sprite(provider->loadanimation(notice.resolve(back)), vector2d()));
-		sprites.push_back(sprite(provider->loadanimation(notice.resolve("text/" + to_string(param))), vector2d(17, 13)));
+		sprites.push_back(sprite(animation(notice.resolve(back)), vector2d()));
+		sprites.push_back(sprite(animation(notice.resolve("text/" + to_string(param))), vector2d(17, 13)));
 
 		nl::nx::unview_file("UI");
-		provider->unlock();
+		app.getimgcache()->unlock();
 		position = vector2d(292, 200);
 		dimensions = vector2d(362, 219);
 		type = param;

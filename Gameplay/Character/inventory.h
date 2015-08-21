@@ -38,7 +38,10 @@ namespace gameplay
 	class inventory
 	{
 	private:
-		char* slots;
+		vector<char> slots;
+		bool twohandedwep;
+		float wepmultiplier;
+		map<equipstat, short> totalstats;
 		map<short, mapleequip> equipped;
 		map<short, mapleequip> equippedcash;
 		map<short, mapleequip> equips;
@@ -47,11 +50,14 @@ namespace gameplay
 		map<char, mapleitem> etcitems;
 		map<char, mapleitem> cashitems;
 	public:
-		inventory();
-		inventory(char*, map<short, mapleequip>, map<short, mapleequip>, map<short, mapleequip>, map<char, mapleitem>, map<char, mapleitem>, map<char, mapleitem>, map<char, mapleitem>);
-		~inventory();
-		map<short, mapleequip>* getequipped();
-		map<short, mapleequip>* getequippedcash();
+		inventory() {}
+		inventory(vector<char>, map<short, mapleequip>, map<short, mapleequip>, map<short, mapleequip>, map<char, mapleitem>, map<char, mapleitem>, map<char, mapleitem>, map<char, mapleitem>);
+		~inventory() {}
+		map<short, mapleequip>* getequipped() { return &equipped; }
+		map<short, mapleequip>* getequippedcash() { return &equippedcash; }
+		void recalcstats();
+		float getwepmult() { return wepmultiplier; }
+		short gettotal(equipstat es) { return totalstats[es]; }
 	};
 }
 

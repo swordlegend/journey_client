@@ -76,18 +76,16 @@ namespace gameplay
 		int retx;
 		int rety;
 
-		if (posx > hbounds.x() || hbounds.length() < 816)
+		/*if (posx > hbounds.x() || hbounds.length() < 816)
 			retx = hbounds.x();
 		else if (posx < hbounds.y() + 816)
 			retx = hbounds.y() + 816;
-		else
+		else*/
 			retx = static_cast<int>(posx);
 
-		if (posy < vbounds.y() + 624 || vbounds.length() < 624)
+		/*if (posy < vbounds.y() + 624 || vbounds.length() < 624)
 			rety = vbounds.y() + 624;
-		else if (posy > vbounds.x())
-			rety = vbounds.x();
-		else
+		else*/
 			rety = static_cast<int>(posy);
 
 		return vector2d(retx, rety);

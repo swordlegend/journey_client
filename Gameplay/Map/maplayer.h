@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // This file is part of the Journey MMORPG client                           //
-// Copyright Â© 2015 SYJourney                                               //
+// Copyright © 2015 SYJourney                                               //
 //                                                                          //
 // This program is free software: you can redistribute it and/or modify     //
 // it under the terms of the GNU Affero General Public License as           //
@@ -17,14 +17,17 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "stdfax.h"
-#include "nxprovider.h"
+#include "sprite.h"
+#include "nxfile.h"
+
+using namespace graphics;
 
 namespace gameplay
 {
 	class maplayer
 	{
 	public:
-		maplayer(nxprovider* provider, nl::node);
+		maplayer(node);
 		maplayer() {}
 		~maplayer() {}
 		void draw(ID2D1HwndRenderTarget*, vector2d);

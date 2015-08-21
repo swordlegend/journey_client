@@ -80,19 +80,6 @@ namespace gameplay
 
 	class maplelook
 	{
-	private:
-		map<string, map<char, short>> bodydelays;
-		map<string, map<char, short>> facedelays;
-		charsprites sprites;
-		vector2d position;
-		string expression;
-		string state;
-		char frame;
-		char faceframe;
-		short elapsed;
-		short elapsedf;
-		bool faceleft;
-		float scalex;
 	public:
 		bool twohweapon;
 		bool female;
@@ -106,13 +93,28 @@ namespace gameplay
 		~maplelook() {}
 		maplelook(bool, char, int, int, map<char, int>, map<char, int>, vector<int>);
 		string getstate();
-		void addsprites(charsprites, map<string, map<char, short>>, map<string, map<char, short>>);
+		void addsprites(charsprites, map<string, map<char, short>>, map<string, map<char, short>>, map<string, map<char, pair<string, char>>>, map<string, map<char, map<charlayers, map<string, vector2d>>>>);
 		void draw(ID2D1HwndRenderTarget*, vector2d);
-		void update();
+		bool update();
 		void setposition(vector2d);
 		void setfleft(bool);
 		void setstate(string);
 		void setexpression(char);
+	private:
+		map<string, map<char, short>> bodydelays;
+		map<string, map<char, short>> facedelays;
+		map<string, map<char, pair<string, char>>> bodyactions;
+		map<string, map<char, map<charlayers, map<string, vector2d>>>> bodyheadmap;
+		charsprites sprites;
+		vector2d position;
+		string expression;
+		string state;
+		char frame;
+		char faceframe;
+		short elapsed;
+		short elapsedf;
+		bool faceleft;
+		float scalex;
 	};
 }
 

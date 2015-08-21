@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // This file is part of the Journey MMORPG client                           //
-// Copyright Â© 2015 SYJourney                                               //
+// Copyright © 2015 SYJourney                                               //
 //                                                                          //
 // This program is free software: you can redistribute it and/or modify     //
 // it under the terms of the GNU Affero General Public License as           //
@@ -30,7 +30,10 @@ namespace program
 
 		result = initfactories();
 
-		uinterface.init(image_factory, dwrite_factory);
+		imgcache.init(image_factory);
+		fonts.init(dwrite_factory);
+
+		uinterface.init();
 		uinterface.add(UI_LOGIN);
 
 		if (result == 0)
@@ -239,6 +242,8 @@ namespace program
 			d2d_rtarget->SetAntialiasMode(D2D1_ANTIALIAS_MODE_ALIASED);
 
 			result = d2d_rtarget->CreateLayer(NULL, &d2d_layer);
+
+			imgcache.settarget(d2d_rtarget);
 		}
 
 		if (result == 0)

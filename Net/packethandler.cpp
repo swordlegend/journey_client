@@ -345,10 +345,10 @@ namespace net
 
 			long timestamp = recv.readlong();
 			app.getui()->remove(UI_CHARSEL);
-			app.getui()->getprovider()->clearcache(CM_LOGIN);
+			app.getimgcache()->clearcache(ict_login);
 			app.getui()->add(UI_STATUSBAR);
 			app.getui()->getfield()->setplayer(player(app.getui()->getfield()->getaccount()->getplayer(), inv, skills, cooldowns, quests, completedquests, trockmaps, bookcover, bookcards, areainfo));
-			app.getui()->getfield()->setfield(app.getui()->getprovider(), app.getui()->getfield()->getplayer()->getstats()->map, app.getui()->getfield()->getplayer()->getstats()->spawnp);
+			app.getui()->getfield()->setfield(app.getui()->getfield()->getplayer()->getstats()->map, app.getui()->getfield()->getplayer()->getstats()->spawnp);
 			app.getui()->enableactions();
 		}
 
@@ -540,9 +540,7 @@ namespace net
 			short fh = recv.readshort();
 			short rx = recv.readshort();
 			short ry = recv.readshort();
-			npc toadd = app.getui()->getprovider()->loadnpc(id);
-			toadd.setinfo(oid, f, fh, vector2d(posx, cy));
-			app.getui()->getfield()->getmapobjects()->addnpc(oid, toadd);
+			app.getui()->getfield()->getmapobjects()->addnpc(oid, npc(id, oid, f, fh, vector2d(posx, cy)));
 		}
 	};
 
@@ -656,9 +654,7 @@ namespace net
 			}
 			bool fadein = recv.readbool();
 			char team = recv.readbyte();
-			mob toadd = app.getui()->getprovider()->loadmob(id);
-			toadd.setinfo(oid, pos, pos, stance, fh, effect, fadein, team);
-			app.getui()->getfield()->getmapobjects()->addmob(oid, toadd);
+			app.getui()->getfield()->getmapobjects()->addmob(oid, mob(id, oid, pos, pos, stance, fh, effect, fadein, team));
 		}
 	};
 
@@ -685,9 +681,7 @@ namespace net
 			}
 			bool fadein = recv.readbool();
 			char team = recv.readbyte();
-			mob toadd = app.getui()->getprovider()->loadmob(id);
-			toadd.setinfo(oid, pos, pos, stance, fh, effect, fadein, team);
-			app.getui()->getfield()->getmapobjects()->addmob(oid, toadd);
+			app.getui()->getfield()->getmapobjects()->addmob(oid, mob(id, oid, pos, pos, stance, fh, effect, fadein, team));
 		}
 	};
 
@@ -718,8 +712,8 @@ namespace net
 			long timestamp = recv.readlong();
 			if (channel == app.getui()->getfield()->getchannel())
 			{
-				app.getui()->getprovider()->clearcache(CM_MAP);
-				app.getui()->getfield()->setfield(app.getui()->getprovider(), mapid, portalid);
+				app.getimgcache()->clearcache(ict_map);
+				app.getui()->getfield()->setfield(mapid, portalid);
 			}
 			else
 			{
@@ -808,9 +802,7 @@ namespace net
 				long expire = recv.readlong();
 			}
 			bool playerdrop = recv.readbool();
-			
-			itemdrop drop = itemdrop(app.getui()->getprovider()->loaditemicon(itemid, meso), dropfrom, dropto, oid, itemid, owner, meso, pickuptype, playerdrop);
-			app.getui()->getfield()->getmapobjects()->additemdrop(oid, drop);
+			app.getui()->getfield()->getmapobjects()->additemdrop(oid, itemdrop(itemid, meso, dropfrom, dropto, oid, owner, pickuptype, playerdrop));
 		}
 	};
 

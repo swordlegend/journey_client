@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // This file is part of the Journey MMORPG client                           //
-// Copyright Â© 2015 SYJourney                                               //
+// Copyright © 2015 SYJourney                                               //
 //                                                                          //
 // This program is free software: you can redistribute it and/or modify     //
 // it under the terms of the GNU Affero General Public License as           //
@@ -19,9 +19,9 @@
 
 namespace gameplay
 {
-	maplayer::maplayer(nxprovider* provider, nl::node source)
+	maplayer::maplayer(node source)
 	{
-		string tS = source.resolve("info/tS").get_string();
+		string tS = source["info"]["tS"].get_string();
 		for (node layernode = source.begin(); layernode != source.end(); layernode++)
 		{
 			if (layernode.name() == "obj")
@@ -33,7 +33,7 @@ namespace gameplay
 						static_cast<int>(objnode.resolve("y").get_integer()));
 					int z = static_cast<int>(objnode.resolve("z").get_integer());
 					node bmpnode = nx::nodes["Obj"].resolve("Obj/" + objnode.resolve("oS").get_string() + ".img/" + objnode.resolve("l0").get_string() + "/" + objnode.resolve("l1").get_string() + "/" + objnode.resolve("l2").get_string());
-					objs[z].push_back(sprite(provider->loadanimation(bmpnode), position, true, objnode.resolve("f").get_bool()));
+					objs[z].push_back(sprite(animation(bmpnode), position, true, objnode.resolve("f").get_bool()));
 				}
 			}
 			else if (layernode.name() == "tile")
@@ -45,7 +45,7 @@ namespace gameplay
 						static_cast<int>(tilenode.resolve("y").get_integer()));
 					int zM = static_cast<int>(tilenode.resolve("zM").get_integer());
 					node bmpnode = nx::nodes["Tile"].resolve("Tile/" + tS + ".img/" + tilenode.resolve("u").get_string() + "/" + to_string(tilenode.resolve("no").get_integer()));
-					tiles[zM].push_back(sprite(provider->loadanimation(bmpnode), position));
+					tiles[zM].push_back(sprite(animation(bmpnode), position));
 				}
 			}
 		}

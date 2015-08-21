@@ -16,13 +16,18 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.    //
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
-#include "packethandler.h"
+#include "ui.h"
+#include "imagecache.h"
+#include "fontcache.h"
+#include "lookfactory.h"
 #include <d2d1.h>
 #include <d2d1helper.h>
 #include <dwrite.h>
 #include <wincodecsdk.h>
 #include <windowsx.h>
 #include <math.h>
+
+using namespace io;
 
 namespace program
 {
@@ -33,12 +38,17 @@ namespace program
 		~winapp();
 		long init();
 		ui* getui() { return &uinterface; }
+		fontcache* getfonts() { return &fonts; }
+		imagecache* getimgcache() { return &imgcache; }
+		lookfactory* getlookfactory() { return &lookf; }
 	private:
 		long initfactories();
 		void draw();
 		static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 		ui uinterface;
-		nxprovider provider;
+		fontcache fonts;
+		lookfactory lookf;
+		imagecache imgcache;
 		HWND window;
 		ID2D1Factory* d2d_factory;
 		IWICImagingFactory* image_factory;

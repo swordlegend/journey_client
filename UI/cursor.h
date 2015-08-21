@@ -18,8 +18,6 @@
 #pragma once
 #include "stdfax.h"
 #include "animation.h"
-#include "nxprovider.h"
-#include "nxfile.h"
 
 using namespace std;
 using namespace graphics;
@@ -52,7 +50,7 @@ namespace io
 	public:
 		cursor();
 		~cursor();
-		void init(nxprovider*);
+		void init();
 		void update(vector2d);
 		void update();
 		void draw(ID2D1HwndRenderTarget*);

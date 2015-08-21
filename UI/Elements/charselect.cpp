@@ -21,49 +21,58 @@
 
 namespace io
 {
-	charselect::charselect(nxprovider* provider, char cslots, vector<maplechar>* chars)
+	charselect::charselect(char cslots, vector<maplechar>* chars)
 	{
-		provider->clearcache(CM_LOGIN);
-		provider->setcmode(CM_LOGIN);
+		app.getimgcache()->clearcache(ict_login);
+		app.getimgcache()->setmode(ict_login);
 		nl::nx::view_file("UI");
 
 		node login = nl::nx::nodes["UI"].resolve("Login.img");
 		node charsel = login.resolve("CharSelect");
 
-		sprites.push_back(sprite(provider->loadanimation(login.resolve("Title/worldsel")), vector2d()));
-		sprites.push_back(sprite(provider->loadanimation(login.resolve("Common/frame")), vector2d(400, 290)));
-		sprites.push_back(sprite(provider->loadanimation(login.resolve("Common/selectWorld")), vector2d(580, 42)));
-		sprites.push_back(sprite(provider->loadanimation(charsel.resolve("selectedWorld/icon/15")), vector2d(580, 42)));
-		sprites.push_back(sprite(provider->loadanimation(charsel.resolve("selectedWorld/name/15")), vector2d(580, 42)));
-		sprites.push_back(sprite(provider->loadanimation(charsel.resolve("selectedWorld/ch/" + to_string(app.getui()->getfield()->getchannel()))), vector2d(580, 42)));
-		sprites.push_back(sprite(provider->loadanimation(charsel.resolve("charInfo")), vector2d(662, 355)));
+		sprites.push_back(sprite(animation(login.resolve("Title/worldsel")), vector2d()));
+		sprites.push_back(sprite(animation(login.resolve("Common/frame")), vector2d(400, 290)));
+		sprites.push_back(sprite(animation(login.resolve("Common/selectWorld")), vector2d(580, 42)));
+		sprites.push_back(sprite(animation(charsel.resolve("selectedWorld/icon/15")), vector2d(580, 42)));
+		sprites.push_back(sprite(animation(charsel.resolve("selectedWorld/name/15")), vector2d(580, 42)));
+		sprites.push_back(sprite(animation(charsel.resolve("selectedWorld/ch/" + to_string(app.getui()->getfield()->getchannel()))), vector2d(580, 42)));
+		sprites.push_back(sprite(animation(charsel.resolve("charInfo")), vector2d(662, 355)));
 
-		buttons.insert(make_pair(BT_ARBEIT, button(provider->loadbutton(charsel.resolve("arbeit")), 580, 115)));
-		buttons.insert(make_pair(BT_CHARCARD, button(provider->loadbutton(charsel.resolve("characterCard")), 665, 115)));
+		buttons.insert(make_pair(BT_ARBEIT, button(charsel.resolve("arbeit"), 580, 115)));
+		buttons.insert(make_pair(BT_CHARCARD, button(charsel.resolve("characterCard"), 665, 115)));
 
-		buttons.insert(make_pair(BT_NEWCHAR, button(provider->loadbutton(charsel.resolve("BtNew")), 200, 495)));
-		buttons.insert(make_pair(BT_DELCHAR, button(provider->loadbutton(charsel.resolve("BtDelete")), 320, 495)));
+		buttons.insert(make_pair(BT_NEWCHAR, button(charsel.resolve("BtNew"), 200, 495)));
+		buttons.insert(make_pair(BT_DELCHAR, button(charsel.resolve("BtDelete"), 320, 495)));
 
-		buttons.insert(make_pair(BT_SELCHAR, button(provider->loadbutton(charsel.resolve("BtSelect")), 586, 427)));
+		buttons.insert(make_pair(BT_SELCHAR, button(charsel.resolve("BtSelect"), 586, 427)));
 
 		for (char i = chars->size(); i < cslots; i++)
 		{
-			sprites.push_back(sprite(provider->loadanimation(charsel.resolve("buyCharacter")), vector2d(130 + (120 * (i % 4)), 250 + (200 * (i > 3)))));
+			sprites.push_back(sprite(animation(charsel.resolve("buyCharacter")), vector2d(130 + (120 * (i % 4)), 250 + (200 * (i > 3)))));
 		}
+
+		node nametagnode = charsel["nameTag"];
+		pair<vector<texture>, vector<texture>> nttextures;
+		nttextures.first.push_back(texture(nametagnode.resolve("0/0")));
+		nttextures.first.push_back(texture(nametagnode.resolve("0/1")));
+		nttextures.first.push_back(texture(nametagnode.resolve("0/2")));
+		nttextures.second.push_back(texture(nametagnode.resolve("1/0")));
+		nttextures.second.push_back(texture(nametagnode.resolve("1/1")));
+		nttextures.second.push_back(texture(nametagnode.resolve("1/2")));
 
 		for (char i = 0; i < chars->size(); i++)
 		{
-			nametag charname = nametag(provider->getfont(DWF_CENTER), TXC_WHITE, provider->loadnametag(charsel.resolve("nameTag")), chars->at(i).getstats()->name, vector2d(55 + (120 * (i % 4)), 250 + (200 * (i > 3))), (i == 0));
+			nametag charname = nametag(app.getfonts()->getfont(DWF_CENTER), TXC_WHITE, nttextures, chars->at(i).getstats()->name, vector2d(55 + (120 * (i % 4)), 250 + (200 * (i > 3))), (i == 0));
 			nametags.push_back(charname);
 			buttons.insert(make_pair(BT_CHAR0 + i, button(105 + (120 * (i % 4)), 170 + (200 * (i > 3)), 50, 80)));
 			buttons[BT_CHAR0].setstate("pressed");
 		}
 
-		provider->unlock();
-		provider->setcmode(CM_SYS);
+		app.getimgcache()->unlock();
+		app.getimgcache()->setmode(ict_sys);
 
-		lvset = provider->loadcharset(charsel.resolve("lv"));
-		statset = provider->loadcharset(nl::nx::nodes["UI"].resolve("StatusBar2.img/mainBar/gauge/number"));
+		lvset = charset(charsel.resolve("lv"));
+		statset = charset(nl::nx::nodes["UI"].resolve("StatusBar2.img/mainBar/gauge/number"));
 
 		nl::nx::unview_file("UI");
 		nl::nx::view_file("Character");
@@ -71,7 +80,8 @@ namespace io
 		for (char i = 0; i < chars->size(); i++)
 		{
 			maplelook* plook = chars->at(i).getlook();
-			provider->loadcharlook(plook);
+			app.getlookfactory()->loadcharlook(plook);
+
 			maplelook look = chars->at(i).copylook();
 			look.setposition(vector2d(130 + (120 * (i % 4)), 250 + (200 * (i > 3))));
 			look.setfleft(false);
@@ -85,7 +95,7 @@ namespace io
 		}
 
 		nl::nx::unview_file("Character");
-		provider->unlock();
+		app.getimgcache()->unlock();
 		position = vector2d(0, 0);
 		dimensions = vector2d(800, 600);
 		active = true;
@@ -107,13 +117,13 @@ namespace io
 
 		maplestats* info = stats[selected];
 
-		lvset.draw(target, 'l', vector2d(648, 262));
-		lvset.draw(target, to_string(info->level), 12, cha_left, vector2d(655, 262));
+		lvset.draw('l', vector2d(648, 262));
+		lvset.draw(to_string(info->level), 12, cha_left, vector2d(655, 262));
 
-		statset.draw(target, to_string(info->str), cha_right, vector2d(655, 385));
-		statset.draw(target, to_string(info->dex), cha_right, vector2d(655, 407));
-		statset.draw(target, to_string(info->int_), cha_right, vector2d(732, 385));
-		statset.draw(target, to_string(info->luk), cha_right, vector2d(732, 407));
+		statset.draw(to_string(info->str), cha_right, vector2d(655, 385));
+		statset.draw(to_string(info->dex), cha_right, vector2d(655, 407));
+		statset.draw(to_string(info->int_), cha_right, vector2d(732, 385));
+		statset.draw(to_string(info->luk), cha_right, vector2d(732, 407));
 	}
 
 	void charselect::update()

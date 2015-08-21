@@ -19,14 +19,12 @@
 #include "stdfax.h"
 #include "playfield.h"
 #include "uielement.h"
-#include "elements.h"
-#include "nxprovider.h"
 #include "cursor.h"
 #include "keyboard.h"
-#include "equipinventory.h"
 
 using namespace std;
 using namespace util;
+using namespace gameplay;
 
 namespace io
 {
@@ -35,7 +33,7 @@ namespace io
 	public:
 		ui() {}
 		~ui() {}
-		void init(IWICImagingFactory*, IDWriteFactory*);
+		void init();
 		void draw(ID2D1HwndRenderTarget*);
 		void update();
 		void enableactions();
@@ -51,15 +49,13 @@ namespace io
 		textfield* getactivetext();
 		keyboard* getkeyboard();
 		playfield* getfield() { return &field; }
-		nxprovider* getprovider() { return &provider; }
 	private:
-		nxprovider provider;
-		playfield field;
 		map<char, uielement*> elements;
-		SRWLOCK uilock;
-		textfield* activetext;
+		playfield field;
 		cursor mouse;
 		keyboard keys;
+		textfield* activetext;
+		SRWLOCK uilock;
 		bool shift;
 		bool actionsenabled;
 	};

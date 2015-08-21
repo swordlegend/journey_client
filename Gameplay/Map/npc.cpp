@@ -17,29 +17,87 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "npc.h"
-
+#include "Journey.h"
+#include "nxfile.h"
 
 namespace gameplay
 {
-	npc::npc() {}
-
-	npc::~npc() {}
-
-	npc::npc(map<string, animation> t, map<string, vector<string>> l, string n, string f)
+	npc::npc(int id, int o, bool fr, short f, vector2d pos)
 	{
-		textures = t;
-		lines = l;
-		name = n;
-		func = f;
-		state = "stand";
-	}
+		app.getimgcache()->setmode(ict_map);
+		nx::view_file("Npc");
 
-	void npc::setinfo(int o, bool fr, short f, vector2d pos)
-	{
+		string fullname;
+		string strid = to_string(id);
+		char extend = 7 - strid.length();
+		for (char i = 0; i < extend; i++)
+		{
+			fullname.append("0");
+		}
+		fullname.append(strid);
+		node npcdata = nx::nodes["Npc"].resolve(fullname + ".img");
+
+		map<string, vector<string>> linenames;
+		for (node npcnode = npcdata.begin(); npcnode != npcdata.end(); npcnode++)
+		{
+			string state = npcnode.name();
+			if (state == "info")
+			{
+				node speak = npcnode.resolve("speak");
+				if (speak.size() > 0)
+				{
+					for (node speaknode = speak.begin(); speaknode != speak.end(); speaknode++)
+					{
+						linenames[state].push_back(speaknode.get_string());
+					}
+				}
+			}
+			else
+			{
+				textures[state] = animation(npcnode);
+				node speak = npcnode.resolve("speak");
+				if (speak.size() > 0)
+				{
+					for (node speaknode = speak.begin(); speaknode != speak.end(); speaknode++)
+					{
+						linenames[state].push_back(speaknode.get_string());
+					}
+				}
+			}
+		}
+
+		nx::unview_file("Npc");
+		nx::view_file("String");
+
+		node stringdata = nx::nodes["String"].resolve("Npc.img/" + strid);
+
+		node namenode = stringdata.resolve("name");
+		if (namenode.data_type() == node::type::string)
+			name = namenode.get_string();
+
+		node funcnode = stringdata.resolve("func");
+		if (funcnode.data_type() == node::type::string)
+			func = funcnode.get_string();
+
+		for (map<string, vector<string>>::iterator stit = linenames.begin(); stit != linenames.end(); stit++)
+		{
+			string state = stit->first;
+			vector<string> names = stit->second;
+			for (vector<string>::iterator nit = names.begin(); nit != names.end(); nit++)
+			{
+				string line = stringdata.resolve(*nit).get_string();
+				lines[state].push_back(line);
+			}
+		}
+
+		nx::unview_file("String");
+		app.getimgcache()->unlock();
+
 		oid = o;
 		front = fr;
 		fh = f;
 		position = pos;
+		state = "stand";
 	}
 
 	void npc::draw(ID2D1HwndRenderTarget* target, vector2d parentpos)

@@ -21,50 +21,50 @@
 
 namespace io
 {
-	worldselect::worldselect(nxprovider* provider, char num, char* chloads)
+	worldselect::worldselect(char num, char* chloads)
 	{
-		provider->clearcache(CM_LOGIN);
-		provider->setcmode(CM_LOGIN);
+		app.getimgcache()->clearcache(ict_login);
+		app.getimgcache()->setmode(ict_login);
 		nl::nx::view_file("UI");
 		nl::nx::view_file("Back");
 		node back = nl::nx::nodes["Back"].resolve("Back/login.img/back/");
 		node login = nl::nx::nodes["UI"].resolve("Login.img/");
 		node worlds = login.resolve("WorldSelect/BtWorld/release/");
 
-		sprites.push_back(sprite(provider->loadanimation(back.resolve("11")), vector2d(370, 300)));
-		sprites.push_back(sprite(provider->loadanimation(worlds.resolve("layer:bg")), vector2d(650, 45)));
-		sprites.push_back(sprite(provider->loadanimation(login.resolve("Common/frame")), vector2d(400, 290)));
+		sprites.push_back(sprite(animation(back.resolve("11")), vector2d(370, 300)));
+		sprites.push_back(sprite(animation(worlds.resolve("layer:bg")), vector2d(650, 45)));
+		sprites.push_back(sprite(animation(login.resolve("Common/frame")), vector2d(400, 290)));
 
-		buttons.insert(make_pair(BT_WORLDSEL0, button(provider->loadbutton(worlds.resolve("button:15")), 650, 20)));
+		buttons.insert(make_pair(BT_WORLDSEL0, button(worlds.resolve("button:15"), 650, 20)));
 
-		sprites.push_back(sprite(provider->loadanimation(worlds.resolve("button:16/normal")), vector2d(650, 74)));
+		sprites.push_back(sprite(animation(worlds.resolve("button:16/normal")), vector2d(650, 74)));
 
 		for (char i = 14; i >= 0; i--)
 		{
-			sprites.push_back(sprite(provider->loadanimation(worlds.resolve("button:" + to_string(i) + "/normal")), vector2d(650, 47)));
+			sprites.push_back(sprite(animation(worlds.resolve("button:" + to_string(i) + "/normal")), vector2d(650, 47)));
 		}
 
 		node channels = login.resolve("WorldSelect/BtChannel/");
 
-		sprites.push_back(sprite(provider->loadanimation(channels.resolve("layer:bg")), vector2d(200, 170)));
-		sprites.push_back(sprite(provider->loadanimation(channels.resolve("release/layer:15")), vector2d(200, 170)));
+		sprites.push_back(sprite(animation(channels.resolve("layer:bg")), vector2d(200, 170)));
+		sprites.push_back(sprite(animation(channels.resolve("release/layer:15")), vector2d(200, 170)));
 
 		for (char i = 0; i < num; i++)
 		{
 			button chi = button(
-				provider->loadtexture(channels.resolve("button:" + to_string(i) + "/normal/0")),
-				provider->loadtexture(channels.resolve("button:" + to_string(i) + "/keyFocused/0")),
+				texture(channels.resolve("button:" + to_string(i) + "/normal/0")),
+				texture(channels.resolve("button:" + to_string(i) + "/keyFocused/0")),
 				200, 170);
 			if (i == 0)
 				chi.setstate("pressed");
 			buttons.insert(make_pair(BT_CHANNELSEL0 + i, chi));
 		}
 
-		buttons.insert(make_pair(BT_GOWORLD, button(provider->loadbutton(channels.resolve("button:GoWorld")), 200, 170)));
+		buttons.insert(make_pair(BT_GOWORLD, button(channels.resolve("button:GoWorld"), 200, 170)));
 
 		nl::nx::unview_file("Back");
 		nl::nx::unview_file("UI");
-		provider->unlock();
+		app.getimgcache()->unlock();
 		position = vector2d(0, 0);
 		dimensions = vector2d(800, 600);
 		active = true;

@@ -33,7 +33,7 @@ namespace gameplay
 		AcquireSRWLockShared(&objlock);
 		for (map<int, mob>::iterator mobit = mobs.begin(); mobit != mobs.end(); ++mobit)
 		{
-			if (colliding(mobit->second.getposition(), range) && mobit->second.isalive())
+			if (colliding(make_pair(mobit->second.getposition(), mobit->second.getdimension()), range) && mobit->second.isalive())
 			{
 				mobit->second.damage(attack, basedamage);
 				attack->numattacked++;
@@ -158,7 +158,7 @@ namespace gameplay
 				}
 			}
 
-			for (map<int, itemdrop>::iterator drpit = drops.begin(); drpit != drops.end(); ++drpit)
+			/*for (map<int, itemdrop>::iterator drpit = drops.begin(); drpit != drops.end(); ++drpit)
 			{
 				bool removed = drpit->second.update();
 
@@ -166,7 +166,7 @@ namespace gameplay
 				{
 					toremove.push_back(drpit->first);
 				}
-			}
+			}*/
 
 			ReleaseSRWLockShared(&objlock);
 		}

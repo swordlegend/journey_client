@@ -19,13 +19,16 @@
 
 namespace gameplay
 {
-	itemdrop::itemdrop(texture ico, vector2d pos, vector2d dest, int id, int iid, int own, bool mes, char put, bool pld)
+	itemdrop::itemdrop(int id, bool mes, vector2d pos, vector2d dest, int o, int own, char put, bool pld)
 	{
-		icon = ico;
+		if (!meso)
+		{
+			ico = icon(id, true);
+		}
 		position = pos;
 		destination = dest;
-		oid = id;
-		itemid = iid;
+		oid = o;
+		itemid = id;
 		owner = own;
 		meso = mes;
 		pickuptype = put;
@@ -56,14 +59,17 @@ namespace gameplay
 			position = vector2d(position.y(), static_cast<int>(fy));
 		}
 
-		icon.draw(target, viewpos, alpha);
+		if (!meso)
+		{
+			ico.draw(viewpos, alpha);
+		}
 	}
 
 	bool itemdrop::update()
 	{
 		if (floating && !pickedup)
 		{
-			vspeed = (position.y() > borders.center()) ? -2 : 2;
+			vspeed = (position.y() > borders.center()) ? -2.0f : 2.0f;
 			vspeed += (borders.center() - position.y());
 		}
 		else

@@ -19,12 +19,30 @@
 
 namespace gameplay
 {
-	mapinfo::mapinfo(int id, nl::node infonode)
+	mapinfo::mapinfo(int id, nl::node mapnode)
 	{
 		mapid = id;
+		nl::node infonode = mapnode["info"];
 
-		mapwalls = vector2d(infonode.resolve("VRLeft").get_integer(), infonode.resolve("VRRight").get_integer());
-		mapborders = vector2d(infonode.resolve("VRTop").get_integer(), infonode.resolve("VRBottom").get_integer());
+		nl::node VRnode = infonode.resolve("VRLeft");
+		if (VRnode.data_type() == nl::node::type::integer)
+		{
+			mapwalls = vector2d(infonode.resolve("VRLeft").get_integer(), infonode.resolve("VRRight").get_integer());
+			mapborders = vector2d(infonode.resolve("VRTop").get_integer(), infonode.resolve("VRBottom").get_integer());
+		}
+		else
+		{
+			nl::node miniMap = mapnode["miniMap"];
+
+			int centerX = miniMap["centerX"].get_integer();
+			int centerY = miniMap["centerY"].get_integer();
+			int width = miniMap["width"].get_integer();
+			int height = miniMap["height"].get_integer() + 1000;
+
+			mapwalls = vector2d(centerX - width / 2, centerX + width / 2);
+			mapborders = vector2d(centerY - height / 2, centerY + height / 2);
+		}
+
 		bgm = infonode.resolve("bgm").get_string();
 		cloud = infonode.resolve("cloud").get_bool();
 		fieldlimit = static_cast<int>(infonode.resolve("fieldLimit").get_integer());

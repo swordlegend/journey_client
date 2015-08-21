@@ -17,15 +17,21 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "ui.h"
+#include "login.h"
+#include "loginwait.h"
+#include "loginnotice.h"
+#include "worldselect.h"
+#include "charselect.h"
+#include "statusbar.h"
+#include "equipinventory.h"
 
 namespace io
 {
-	void ui::init(IWICImagingFactory* image_f, IDWriteFactory* write_f)
+	void ui::init()
 	{
 		uilock = SRWLOCK_INIT;
 
-		provider.init(image_f, write_f);
-		mouse.init(&provider);
+		mouse.init();
 
 		shift = false;
 		actionsenabled = true;
@@ -49,30 +55,28 @@ namespace io
 		switch (type)
 		{
 		case UI_LOGIN:
-			toadd = new login(&provider);
+			toadd = new login();
 			break;
 		case UI_LOGINNOTICE:
-			toadd = new loginnotice(&provider, param);
+			toadd = new loginnotice(param);
 			actionsenabled = true;
 			break;
 		case UI_LOGINWAIT:
-			toadd = new loginwait(&provider);
+			toadd = new loginwait();
 			break;
 		case UI_WORLDSELECT:
-			toadd = new loginworld(&provider, field.getworlds()->at(0).getchannels(), field.getworlds()->at(0).getchloads());
-			field.worldid = 0;
-			field.channelid = 0;
+			toadd = new worldselect(field.getworlds()->at(0).getchannels(), field.getworlds()->at(0).getchloads());
 			actionsenabled = true;
 			break;
 		case UI_CHARSEL:
-			toadd = new logincharsel(&provider, field.getaccount()->getslots(), field.getaccount()->getchars());
+			toadd = new charselect(field.getaccount()->getslots(), field.getaccount()->getchars());
 			actionsenabled = true;
 			break;
 		case UI_STATUSBAR:
-			toadd = new statusbar(&provider, field.getplayer()->getstats());
+			toadd = new statusbar(field.getplayer()->getstats());
 			break;
 		case UI_EQUIPS:
-			toadd = new equipinventory(&provider, field.getplayer()->getinventory());
+			toadd = new equipinventory(field.getplayer()->getinventory());
 			break;
 		}
 		elements[type] = toadd;
@@ -216,6 +220,7 @@ namespace io
 				case KA_SIT:
 					break;
 				case KA_ATTACK:
+					field.useattack(-1);
 					break;
 				}
 				break;

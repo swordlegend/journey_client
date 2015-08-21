@@ -17,37 +17,29 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "stdfax.h"
-#include "icon.h"
 
-using namespace graphics;
+using namespace std;
 
-namespace gameplay
+namespace program
 {
-	class itemdrop
+	enum dwfonts : char
+	{
+		DWF_LEFT,
+		DWF_CENTER,
+		DWF_RIGHT,
+		DWF_LARGE
+	};
+
+	class fontcache
 	{
 	public:
-		itemdrop(int, bool, vector2d, vector2d, int, int, char, bool);
-		itemdrop() {}
-		~itemdrop() {}
-		void draw(ID2D1HwndRenderTarget*, vector2d);
-		bool update();
-		void expire() { pickedup = true; }
+		fontcache() {}
+		~fontcache();
+		void init(IDWriteFactory*);
+		IDWriteTextFormat* getfont(dwfonts);
 	private:
-		icon ico;
-		vector2d position;
-		vector2d destination;
-		vector2d borders;
-		int oid;
-		int itemid;
-		int owner;
-		bool meso;
-		char pickuptype;
-		float alpha;
-		bool playerdrop;
-		bool pickedup;
-		bool floating;
-		float vspeed;
-		float fy;
+		unique_ptr<IDWriteFactory> fontfactory;
+		map<dwfonts, IDWriteTextFormat*> fonts;
 	};
 }
 

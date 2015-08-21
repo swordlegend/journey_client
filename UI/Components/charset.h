@@ -36,10 +36,10 @@ namespace io
 	public:
 		charset() {}
 		~charset() {}
-		charset(map<char, texture>);
-		int draw(ID2D1HwndRenderTarget*, char, vector2d);
-		int draw(ID2D1HwndRenderTarget*, string, alignment, vector2d);
-		int draw(ID2D1HwndRenderTarget*, string, char, alignment, vector2d);
+		charset(node);
+		int draw(char, vector2d);
+		int draw(string, alignment, vector2d);
+		int draw(string, char, alignment, vector2d);
 	private:
 		map<char, texture> characters;
 		int getw(char);

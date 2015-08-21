@@ -38,10 +38,9 @@ namespace gameplay
 		short fh;
 		vector2d position;
 	public:
-		npc();
-		~npc();
-		npc(map<string, animation>, map<string, vector<string>>, string, string);
-		void setinfo(int, bool, short, vector2d);
+		npc() {}
+		~npc() {}
+		npc(int, int, bool, short, vector2d);
 		void draw(ID2D1HwndRenderTarget*, vector2d);
 		void update();
 	};

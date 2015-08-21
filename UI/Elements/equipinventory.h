@@ -18,7 +18,6 @@
 #pragma once
 #include "stdfax.h"
 #include "uielement.h"
-#include "nxprovider.h"
 #include "inventory.h"
 
 using namespace std;
@@ -34,7 +33,7 @@ namespace io
 		bool showpet;
 		vector<sprite> petsprites;
 	public:
-		equipinventory(nxprovider*, inventory*);
+		equipinventory(inventory*);
 		~equipinventory();
 		void draw(ID2D1HwndRenderTarget*);
 		void update();

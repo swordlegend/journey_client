@@ -47,5 +47,6 @@ namespace gameplay
 		fame = fm;
 		map = mi;
 		spawnp = spa;
+		basedamage = 0;
 	}
 }

@@ -39,43 +39,43 @@ namespace gameplay
 
 	void playfield::useattack(int skillid)
 	{
-		if (skillid == -1)
+		if (playerchar.attack(skillid))
 		{
-			bool left = playerchar.getleft();
-
-			pair<vector2d, vector2d> attackrange;
-			vector2d range = vector2d(50, 80);
-			vector2d playerpos = playerchar.getposition();
-			if (left)
+			if (skillid == -1)
 			{
-				attackrange.first = playerpos - range;
-				attackrange.second = playerpos;
+				bool left = playerchar.getleft();
+
+				pair<vector2d, vector2d> attackrange;
+				attackrange.first = playerchar.getposition();
+				if (left)
+				{
+					attackrange.second = vector2d(-100, 80);
+				}
+				else
+				{
+					attackrange.second = vector2d(100, 80);
+				}
+
+				int basedamage = playerchar.getstats()->basedamage;
+
+				attackinfo attack;
+				attack.mastery = 0.5f; //todo: get from char
+				attack.skill = 0;
+				attack.maxattacked = 1;
+				attack.display = 5;
+				attack.charge = 0;
+				attack.speed = 2; //todo: wep speed of char
+				attack.direction = (left) ? 1 : 0;
+				attack.numdamage = 1;
+				attack.stance = 1; //maybe body animation?
+
+				map_objects.sendattack(&attack, basedamage, attackrange);
+				packet_c.close_attack(attack);
 			}
 			else
 			{
-				attackrange.first = playerpos;
-				attackrange.second = playerpos + range;
+				//get skill
 			}
-
-			int basedamage = playerchar.getstats()->basedamage;
-
-			attackinfo attack;
-			attack.mastery = 0.5f; //todo: get from char
-			attack.skill = 0;
-			attack.maxattacked = 1;
-			attack.display = 5;
-			attack.charge = 0;
-			attack.speed = 2; //todo: wep speed of char
-			attack.direction = (left) ? 1 : 0;
-			attack.numdamage = 1;
-			attack.stance = 1; //maybe body animation?
-
-			map_objects.sendattack(&attack, basedamage, attackrange);
-			packet_c.close_attack(attack);
-		}
-		else
-		{
-			//get skill
 		}
 	}
 
@@ -90,13 +90,13 @@ namespace gameplay
 			maplayers[1].draw(target, view.getposition());
 			maplayers[2].draw(target, view.getposition());
 			maplayers[3].draw(target, view.getposition());
-			map_objects.draw(target, view.getposition());
-			playerchar.draw(target, view.getposition());
-			portals.draw(target, view.getposition());
 			maplayers[4].draw(target, view.getposition());
 			maplayers[5].draw(target, view.getposition());
 			maplayers[6].draw(target, view.getposition());
 			maplayers[7].draw(target, view.getposition());
+			map_objects.draw(target, view.getposition());
+			playerchar.draw(target, view.getposition());
+			portals.draw(target, view.getposition());
 			backgrounds.drawforegrounds(target, view.getposition());
 		}
 	}
@@ -125,14 +125,14 @@ namespace gameplay
 		playerchar = plchar;
 	}
 
-	void playfield::setfield(nxprovider* provider, int mapid, char pid)
+	void playfield::setfield(int mapid, char pid)
 	{
 		step = GST_TRANSITION;
 
 		map_objects.clear();
 		portals.clear();
 
-		provider->setcmode(CM_MAP);
+		app.getimgcache()->setmode(ict_map);
 		nl::nx::view_file("Map");
 
 		string fullname;
@@ -144,7 +144,7 @@ namespace gameplay
 		}
 		node mapdata = nl::nx::nodes["Map"].resolve("Map/Map" + to_string(mapid / 100000000) + "/" + fullname.append(strid) + ".img");
 
-		map_info = mapinfo(mapid, mapdata.resolve("info"));
+		map_info = mapinfo(mapid, mapdata);
 		footholds = footholdtree(mapdata.resolve("foothold"));
 
 		nl::node portalnodes = mapdata.resolve("portal");
@@ -164,11 +164,11 @@ namespace gameplay
 			switch (ptype)
 			{
 			case PT_REGULAR:
-				anim = provider->loadanimation(pnode.resolve("pv"));
+				anim = animation(pnode.resolve("pv"));
 				break;
 			case PT_HIDDEN:
 			case PT_SCRIPTED_HIDDEN:
-				anim = provider->loadanimation(pnode.resolve("ph/default/portalContinue"));
+				anim = animation(pnode.resolve("ph/default/portalContinue"));
 				break;
 			}
 
@@ -177,7 +177,7 @@ namespace gameplay
 
 		nl::nx::view_file("Back");
 
-		backgrounds = mapbackgrounds(provider, mapdata.resolve("back"), map_info.getwalls(), map_info.getborders());
+		backgrounds = mapbackgrounds(mapdata.resolve("back"), map_info.getwalls(), map_info.getborders());
 
 		nl::nx::unview_file("Back");
 
@@ -186,13 +186,13 @@ namespace gameplay
 
 		for (int i = 0; i < 8; i++)
 		{
-			maplayers[i] = maplayer(provider, mapdata.resolve(to_string(i)));
+			maplayers[i] = maplayer(mapdata.resolve(to_string(i)));
 		}
 
 		nl::nx::unview_file("Tile");
 		nl::nx::unview_file("Obj");
 		nl::nx::unview_file("Map");
-		provider->unlock();
+		app.getimgcache()->unlock();
 
 		vector2d startpos = portals.getspawnpoint(pid);
 		playerchar.setfh(&footholds);

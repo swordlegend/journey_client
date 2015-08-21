@@ -17,14 +17,13 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "uielement.h"
-#include "nxprovider.h"
 
 namespace io
 {
 	class login : public uielement
 	{
 	public:
-		login(nxprovider*);
+		login();
 		~login() {}
 		void draw(ID2D1HwndRenderTarget*);
 		void update();

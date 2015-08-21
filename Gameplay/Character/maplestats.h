@@ -30,6 +30,7 @@ namespace gameplay
 		int face;
 		int hair;
 		std::vector<long> petids;
+		int basedamage;
 		short level;
 		short job;
 		short str;

@@ -32,8 +32,8 @@ namespace io
 	{
 		vector2d absp = pos + position;
 		int percent = ((value / 100) * barmax) / (max / 100);
-		front.draw(target, absp);
-		barmid.draw(target, absp + vector2d(1, 0), vector2d(percent, 0));
-		barend.draw(target, absp + vector2d(percent + 1, 0));
+		front.draw(absp);
+		barmid.draw(absp + vector2d(1, 0), vector2d(percent, 0));
+		barend.draw(absp + vector2d(percent + 1, 0));
 	}
 }

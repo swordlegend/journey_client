@@ -17,29 +17,32 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "stdfax.h"
+#include "node.h"
 #include "vector2d.h"
+#include "imagecache.h"
 
 using namespace util;
+using namespace nl;
 using namespace std;
+using namespace program;
 
 namespace graphics
 {
 	class texture
 	{
 	public:
+		texture(node);
 		texture();
-		texture(pair<data::cachemode, size_t>, vector2d, vector2d);
-		~texture();
-		void draw(ID2D1HwndRenderTarget*, vector2d);
-		void draw(ID2D1HwndRenderTarget*, vector2d, float);
-		void draw(ID2D1HwndRenderTarget*, vector2d, vector2d);
-		void draw(ID2D1HwndRenderTarget*, vector2d, vector2d, float);
+		~texture() {}
+		void draw(vector2d);
+		void draw(vector2d, float);
+		void draw(vector2d, vector2d);
+		void draw(vector2d, vector2d, float);
 		void shift(vector2d);
 		vector2d getdimension() { return dimension; }
 		vector2d getorigin() { return origin; }
 	private:
-		ID2D1Bitmap* bitmap;
-		pair<data::cachemode, size_t> source;
+		pair<imgcontext, size_t> source;
 		vector2d origin;
 		vector2d dimension;
 	};

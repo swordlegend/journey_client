@@ -17,7 +17,6 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "uielement.h"
-#include "nxprovider.h"
 
 namespace io
 {
@@ -26,7 +25,7 @@ namespace io
 	private:
 		char type;
 	public:
-		loginnotice(nxprovider*, char);
+		loginnotice(char);
 		~loginnotice() {}
 		void buttonpressed(short);
 	};

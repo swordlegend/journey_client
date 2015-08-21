@@ -17,8 +17,10 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "uielement.h"
-#include "nxprovider.h"
+#include "charset.h"
 #include "maplechar.h"
+
+using namespace gameplay;
 
 namespace io
 {
@@ -32,7 +34,7 @@ namespace io
 		charset statset;
 		char selected;
 	public:
-		charselect(nxprovider*, char, vector<maplechar>*);
+		charselect(char, vector<maplechar>*);
 		~charselect() {}
 		void draw(ID2D1HwndRenderTarget*);
 		void update();

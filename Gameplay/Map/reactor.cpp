@@ -19,17 +19,9 @@
 
 namespace gameplay
 {
-	reactor::reactor(map<string, animation*> spr, string nam)
+	reactor::reactor(map<string, animation> spr, string nam)
 	{
 		sprites = spr;
 		name = nam;
-	}
-
-	reactor::~reactor()
-	{
-		for (map<string, animation*>::iterator sprit = sprites.begin(); sprit != sprites.end(); ++sprit)
-		{
-			delete sprit->second;
-		}
 	}
 }

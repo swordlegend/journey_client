@@ -15,13 +15,15 @@
 // You should have received a copy of the GNU Affero General Public License //
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.    //
 //////////////////////////////////////////////////////////////////////////////
+#pragma once
 #include "mapbackgrounds.h"
+#include "nxfile.h"
 
 namespace gameplay
 {
-	mapbackgrounds::mapbackgrounds(nxprovider* provider, nl::node bgnodes, vector2d mapwalls, vector2d mapborders)
+	mapbackgrounds::mapbackgrounds(nl::node bgnodes, vector2d mapwalls, vector2d mapborders)
 	{
-		nl::node back = nx::nodes["Back"].resolve("Back/");
+		nl::node back = nl::nx::nodes["Back"].resolve("Back/");
 
 		for (nl::node backnode = bgnodes.begin(); backnode != bgnodes.end(); backnode++)
 		{
@@ -40,7 +42,7 @@ namespace gameplay
 				vector2d cpos = vector2d(backnode.resolve("cx").get_integer(), backnode.resolve("cy").get_integer());
 				byte alpha = static_cast<byte>(backnode.resolve("a").get_integer());
 
-				background bgobj = background(provider->loadanimation(spritenode), type, f, pos, rpos, cpos, mapwalls, mapborders, alpha);
+				background bgobj = background(animation(spritenode), type, f, pos, rpos, cpos, mapwalls, mapborders, alpha);
 
 				if (backnode.resolve("front").get_bool())
 					foregrounds.push_back(bgobj);

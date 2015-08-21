@@ -19,11 +19,48 @@
 
 namespace graphics
 {
-	animation::animation(map<byte, texture> txt, map<byte, short> del, map<byte, pair<byte, byte>> alp)
+	animation::animation(node src)
 	{
-		textures = txt;
-		delays = del;
-		alphablends = alp;
+		if (src.istype(bitmapnode))
+		{
+			textures[0] = texture(src);
+			alphablends[0] = pair<byte, byte>(255, 255);
+		}
+		else
+		{
+			for (node nodeit = src.begin(); nodeit != src.end(); nodeit++)
+			{
+				if (nodeit.istype(bitmapnode))
+				{
+					byte frame = static_cast<byte>(stoi(nodeit.name()));
+
+					node delay = nodeit.resolve("delay");
+					if (delay.istype(integernode))
+						delays[frame] = static_cast<short>(delay.get_integer());
+					else
+						delays[frame] = 50;
+
+					textures[frame] = texture(nodeit);
+
+					node a0_node = nodeit.resolve("a0");
+					if (a0_node.istype(integernode))
+					{
+						byte a0 = static_cast<byte>(a0_node.get_integer());
+
+						node a1_node = nodeit.resolve("a1");
+						if (a1_node.istype(integernode))
+							alphablends[frame] = pair<byte, byte>(a0, static_cast<byte>(a1_node.get_integer()));
+						else
+							alphablends[frame] = pair<byte, byte>(a0, 255 - a0);
+					}
+					else
+					{
+						alphablends[frame] = pair<byte, byte>(255, 255);
+					}
+				}
+			}
+		}
+
 		frame = 0;
 		last_f = textures.size() - 1;
 		elapsed = 0;
@@ -33,12 +70,12 @@ namespace graphics
 
 	void animation::draw(ID2D1HwndRenderTarget* target, vector2d parentpos)
 	{
-		textures[frame].draw(target, parentpos, alpha / 255);
+		textures[frame].draw(parentpos, alpha / 255);
 	}
 
 	void animation::draw(ID2D1HwndRenderTarget* target, vector2d parentpos, float alpha)
 	{
-		textures[frame].draw(target, parentpos, alpha);
+		textures[frame].draw(parentpos, alpha);
 	}
 
 	bool animation::update(short frames)

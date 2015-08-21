@@ -17,7 +17,6 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "maplelook.h"
-#include "nxprovider.h"
 
 namespace gameplay
 {
@@ -49,11 +48,13 @@ namespace gameplay
 		return state;
 	}
 
-	void maplelook::addsprites(charsprites t, map<string, map<char, short>> bd, map<string, map<char, short>> fd)
+	void maplelook::addsprites(charsprites t, map<string, map<char, short>> bd, map<string, map<char, short>> fd, map<string, map<char, pair<string, char>>> ba, map<string, map<char, map<charlayers, map<string, vector2d>>>> bhm)
 	{
 		sprites = t;
 		bodydelays = bd;
 		facedelays = fd;
+		bodyactions = ba;
+		bodyheadmap = bhm;
 	}
 
 	void maplelook::draw(ID2D1HwndRenderTarget* target, vector2d parentpos)
@@ -81,12 +82,12 @@ namespace gameplay
 			{
 				vector2d shf = bodyheadmap[state][frame][CL_HEAD]["neck"] - bodyheadmap[state][frame][CL_BODY]["neck"] - bodyheadmap[state][frame][CL_HEAD]["brow"];
 				txtit->second.shift(vector2d() - shf);
-				txtit->second.draw(target, absp);
+				txtit->second.draw(absp);
 				txtit->second.shift(shf);
 			}
 			else
 			{
-				txtit->second.draw(target, absp);
+				txtit->second.draw(absp);
 			}
 
 			if (!faceleft)
@@ -101,18 +102,26 @@ namespace gameplay
 		}
 	}
 
-	void maplelook::update()
+	bool maplelook::update()
 	{
-		elapsed += DELAY;
+		elapsed += 16;
 
 		short delay = bodydelays[state][frame];
 		if (elapsed > delay)
 		{
 			elapsed -= delay;
 			frame = (bodydelays[state].count(frame + 1))? frame + 1 : 0;
+
+			if (frame == 0)
+			{
+				if (state == "stabO1")
+				{
+					state = "stand1";
+				}
+			}
 		}
 
-		elapsedf += DELAY;
+		elapsedf += 16;
 
 		delay = facedelays[expression][faceframe];
 		if (elapsedf > delay)
@@ -127,6 +136,8 @@ namespace gameplay
 					expression = "default";
 			}
 		}
+
+		return frame == 0;
 	}
 
 	void maplelook::setposition(vector2d pos)

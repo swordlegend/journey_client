@@ -30,6 +30,7 @@ namespace gameplay
 	{
 	private:
 		map<string, animation> textures;
+		map<string, texture> uitextures;
 		int oid;
 		string name;
 		short level;
@@ -39,11 +40,12 @@ namespace gameplay
 		vector2d pos;
 		vector2d walls;
 		string state;
-		short moved;
+		float moved;
 		char stance;
 		short fh;
 		char effect;
 		bool fadein;
+		bool fleft;
 		char team;
 		float hspeed;
 		float vspeed;
@@ -52,8 +54,7 @@ namespace gameplay
 	public:
 		mob() {}
 		~mob() {}
-		mob(map<string, animation>, string, short, short);
-		void setinfo(int, vector2d, vector2d, char, short, char, bool, char);
+		mob(int, int, vector2d, vector2d, char, short, char, bool, char);
 		bool update();
 		void draw(ID2D1HwndRenderTarget*, vector2d);
 		void damage(attackinfo*, int);
@@ -61,6 +62,7 @@ namespace gameplay
 		void setstate(string st) { state = st; }
 		bool isalive() { return state != "die1"; }
 		vector2d getposition() { return pos; }
+		vector2d getdimension() { return textures[state].getdimension(0); }
 	};
 }
 

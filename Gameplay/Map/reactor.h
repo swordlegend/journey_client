@@ -27,11 +27,12 @@ namespace gameplay
 	class reactor
 	{
 	public:
-		reactor(map<string, animation*>, string);
-		~reactor();
+		reactor() {}
+		reactor(map<string, animation>, string);
+		~reactor() {}
 		void setinfo(int, char, vector2d);
 	private:
-		map<string, animation*> sprites;
+		map<string, animation> sprites;
 		string name;
 		int oid;
 		char state;

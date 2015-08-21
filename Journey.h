@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////////////
 // This file is part of the Journey MMORPG client                           //
-// Copyright Â© 2015 SYJourney                                               //
+// Copyright © 2015 SYJourney                                               //
 //                                                                          //
 // This program is free software: you can redistribute it and/or modify     //
 // it under the terms of the GNU Affero General Public License as           //
@@ -19,6 +19,7 @@
 #include "packetcreator.h"
 #include "winapp.h"
 #include "settings.h"
+#include "imagecache.h"
 
 using namespace program;
 using namespace net;

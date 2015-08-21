@@ -43,7 +43,7 @@ namespace io
 
 		if (content == "" && state == "inactive")
 		{
-			bg.draw(target, absp + bgposition);
+			bg.draw(absp + bgposition);
 			return;
 		}
 
@@ -81,12 +81,11 @@ namespace io
 			layoutRect,
 			brush
 			);
-
 	}
 
 	void textfield::update()
 	{
-		elapsed += DELAY;
+		elapsed += 16;
 		if (elapsed >= 300)
 		{
 			showmark = !showmark;
