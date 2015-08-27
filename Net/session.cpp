@@ -117,7 +117,7 @@ namespace net
 			return 2;
 		}
 		packet rcv = packet(recvbuf, result);
-		char version = rcv.readshort();
+		char version = static_cast<char>(rcv.readshort());
 		if (version != 83)
 		{
 			WSACleanup();
@@ -150,10 +150,11 @@ namespace net
 
 	int session::dispatch(packet tosend)
 	{
-		int result;
+		sendlock.lock();
 		char* bytes = encrypter.sendencrypt(tosend.getbytes(), tosend.length());
+		int result = send(sock, bytes, tosend.length() + 4, 0);
+		sendlock.unlock();
 
-		result = send(sock, bytes, tosend.length() + 4, 0);
 		if (result == SOCKET_ERROR) {
 			int nError = WSAGetLastError();
 			close();

@@ -18,17 +18,27 @@
 #pragma once
 #include "stdfax.h"
 #include "animation.h"
+#include "nametag.h"
 
 using namespace std;
 using namespace graphics;
+using namespace io;
 
 namespace gameplay
 {
 	class npc
 	{
+	public:
+		npc() {}
+		~npc() {}
+		npc(int, int, bool, short, vector2d);
+		void draw(ID2D1HwndRenderTarget*, vector2d);
+		void update();
 	private:
 		map<string, animation> textures;
 		map<string, vector<string>> lines;
+		nametag ntag;
+		nametag ftag;
 		string state;
 		string name;
 		string func;
@@ -37,12 +47,6 @@ namespace gameplay
 		bool front;
 		short fh;
 		vector2d position;
-	public:
-		npc() {}
-		~npc() {}
-		npc(int, int, bool, short, vector2d);
-		void draw(ID2D1HwndRenderTarget*, vector2d);
-		void update();
 	};
 }
 

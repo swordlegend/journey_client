@@ -16,31 +16,24 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.    //
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
-#include "stdfax.h"
+#include "texture.h"
 
-using namespace std;
-
-namespace program
+namespace graphics
 {
-	enum dwfonts : char
-	{
-		DWF_LEFT,
-		DWF_CENTER,
-		DWF_RIGHT,
-		DWF_LARGE,
-		dwf_small_r
-	};
-
-	class fontcache
+	class icon
 	{
 	public:
-		fontcache() {}
-		~fontcache();
-		void init(IDWriteFactory*);
-		IDWriteTextFormat* getfont(dwfonts);
+		icon() {}
+		~icon() {}
+		icon(int, bool);
+		icon(node, bool);
+		void toggle() { raw = !raw; }
+		void draw(vector2d, float);
+		void setposition(vector2d p) { pos = p; }
 	private:
-		unique_ptr<IDWriteFactory> fontfactory;
-		map<dwfonts, IDWriteTextFormat*> fonts;
+		map<bool, texture> textures;
+		vector2d pos;
+		bool raw;
 	};
 }
 

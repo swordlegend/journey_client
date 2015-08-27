@@ -37,22 +37,25 @@ namespace gameplay
 
 	class background
 	{
+	public:
+		background(node, node, vector2d, vector2d);
+		~background() {}
+		void draw(ID2D1HwndRenderTarget*, vector2d);
+		void update();
 	private:
-		animation sprite;
+		animation ani;
 		bgtype type;
 		vector2d pos;
 		vector2d rpos;
 		vector2d cpos;
 		vector2d mapwalls;
 		vector2d mapborders;
-		vector2d movement;
 		float alpha;
 		bool flipped;
-	public:
-		background(animation, bgtype, bool, vector2d, vector2d, vector2d, vector2d, vector2d, byte);
-		~background() {}
-		void draw(ID2D1HwndRenderTarget*, vector2d);
-		void update();
+		float vspeed;
+		float hspeed;
+		float fx;
+		float fy;
 	};
 }
 

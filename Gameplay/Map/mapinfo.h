@@ -22,18 +22,20 @@
 
 using namespace std;
 using namespace util;
+using namespace nl;
 
 namespace gameplay
 {
 	class mapinfo
 	{
 	public:
-		mapinfo(int, nl::node);
+		mapinfo(int, node, vector2d, vector2d);
 		mapinfo() {}
 		~mapinfo() {}
 		int getid() { return mapid; }
 		vector2d getwalls() { return mapwalls; }
 		vector2d getborders() { return mapborders; }
+		string getbgm() { return bgm; }
 	private:
 		int mapid;
 		int fieldlimit;

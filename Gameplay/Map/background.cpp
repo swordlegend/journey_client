@@ -20,43 +20,47 @@
 
 namespace gameplay
 {
-	background::background(animation spr, bgtype tp, bool f, vector2d p, vector2d rp, vector2d cp, vector2d mw, vector2d mb, byte a)
+	background::background(node src, node back, vector2d walls, vector2d borders)
 	{
-		sprite = spr;
-		type = tp;
-		flipped = f;
-		pos = p;
-		rpos = rp;
-		cpos = cp;
-		mapwalls = mw;
-		mapborders = mb;
-		alpha = static_cast<float>(a/255);
+		ani = animation(back[src["bS"].get_string() + ".img"][(src["ani"].get_bool()) ? "ani" : "back"][to_string(src["no"].get_integer())]);
+		type = static_cast<bgtype>(src["type"].get_integer());
+		flipped = src["f"].get_bool();
+		pos = vector2d(static_cast<int>(src["x"]), static_cast<int>(src["y"]));
+		rpos = vector2d(static_cast<int>(src["rx"]), static_cast<int>(src["ry"]));
+		cpos = vector2d(static_cast<int>(src["cx"]), static_cast<int>(src["cy"]));
+		alpha = static_cast<float>(src["a"].get_integer() / 255);
+
+		mapwalls = walls;
+		mapborders = borders;
 
 		if (cpos.x() == 0)
-			cpos = vector2d(sprite.getdimension(0).x(), cpos.y());
+			cpos = vector2d(ani.getdimension(0).x(), cpos.y());
 		if (cpos.y() == 0)
-			cpos = vector2d(cpos.x(), sprite.getdimension(0).y());
+			cpos = vector2d(cpos.x(), ani.getdimension(0).y());
 
-		movement = vector2d();
+		fx = static_cast<float>(pos.x());
+		fy = static_cast<float>(pos.y());
+
 		switch (type)
 		{
 		case BGT_HMOVEA:
 		case BGT_HMOVEB:
-			movement = vector2d(1, 0);
+			hspeed = 0.5f;
 			break;
 		case BGT_VMOVEA:
 		case BGT_VMOVEB:
-			movement = vector2d(0, 1);
+			vspeed = 0.5f;
 			break;
+		default:
+			hspeed = 0;
+			vspeed = 0;
 		}
 	}
 
 	void background::draw(ID2D1HwndRenderTarget* target, vector2d parentpos)
 	{
+		pos = vector2d(static_cast<int>(fx), static_cast<int>(fy));
 		vector2d absp = pos + parentpos;
-
-		//mapwalls = vector2d(pos.x(), pos.x() + 816);
-		//mapborders = vector2d(pos.y(), pos.y() + 624);
 
 		if (flipped)
 		{
@@ -78,7 +82,7 @@ namespace gameplay
 			}
 			for (short i = pos.x(); i < mapwalls.y() + cpos.x(); i = i + cpos.x())
 			{
-				sprite.draw(target, vector2d(i + parentpos.x(), absp.y()), alpha);
+				ani.draw(target, vector2d(i + parentpos.x(), absp.y()), alpha);
 			}
 			break;
 		case BGT_VMOVEA:
@@ -89,7 +93,7 @@ namespace gameplay
 			}
 			for (short i = pos.y(); i < mapborders.y() + cpos.y(); i = i + cpos.y())
 			{
-				sprite.draw(target, vector2d(absp.x(), i + parentpos.y()), alpha);
+				ani.draw(target, vector2d(absp.x(), i + parentpos.y()), alpha);
 			}
 			break;
 		case BGT_HMOVEB:
@@ -107,12 +111,12 @@ namespace gameplay
 			{
 				for (short h = pos.y(); h < mapborders.y() + cpos.y(); h = h + cpos.y())
 				{
-					sprite.draw(target, vector2d(i + parentpos.x(), h + parentpos.y()), alpha);
+					ani.draw(target, vector2d(i + parentpos.x(), h + parentpos.y()), alpha);
 				}
 			}
 			break;
 		default:
-			sprite.draw(target, absp, alpha);
+			ani.draw(target, absp, alpha);
 		}
 
 		if (flipped)
@@ -128,7 +132,8 @@ namespace gameplay
 
 	void background::update()
 	{
-		sprite.update();
-		pos = pos + movement;
+		ani.update();
+		fx += hspeed;
+		fy += vspeed;
 	}
 }

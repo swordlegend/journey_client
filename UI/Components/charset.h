@@ -38,8 +38,11 @@ namespace io
 		~charset() {}
 		charset(node);
 		int draw(char, vector2d);
+		int draw(char, vector2d, float);
 		int draw(string, alignment, vector2d);
+		int draw(string, alignment, vector2d, float);
 		int draw(string, char, alignment, vector2d);
+		int draw(string, char, alignment, vector2d, float);
 	private:
 		map<char, texture> characters;
 		int getw(char);

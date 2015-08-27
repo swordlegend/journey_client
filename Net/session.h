@@ -40,6 +40,7 @@ namespace net
 		crypto encrypter;
 		packet curp;
 		packethandler packet_h;
+		mutex sendlock;
 		char buf[BUFLEN];
 		int bufferpos;
 		short p_length;

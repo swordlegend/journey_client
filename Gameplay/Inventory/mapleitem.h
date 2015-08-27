@@ -22,6 +22,12 @@ namespace gameplay
 {
 	class mapleitem
 	{
+	public:
+		mapleitem();
+		~mapleitem();
+		mapleitem(int, short, short, char, bool, long, long, std::string, short);
+		mapleitem(int, short, char, bool, long, long, std::string, char, short, char);
+		int getid() { return itemid; }
 	protected:
 		int itemid;
 		short count;
@@ -36,11 +42,6 @@ namespace gameplay
 		char petlevel;
 		short closeness;
 		char fullness;
-	public:
-		mapleitem();
-		~mapleitem();
-		mapleitem(int, short, short, char, bool, long, long, std::string, short);
-		mapleitem(int, short, char, bool, long, long, std::string, char, short, char);
 	};
 }
 

@@ -17,30 +17,31 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "stdfax.h"
+#include "node.h"
+#include "vector2d.h"
 
+using namespace nl;
+using namespace util;
 using namespace std;
 
-namespace program
+namespace gameplay
 {
-	enum dwfonts : char
+	struct ladderrope
 	{
-		DWF_LEFT,
-		DWF_CENTER,
-		DWF_RIGHT,
-		DWF_LARGE,
-		dwf_small_r
+		vector2d vertical;
+		int x;
+		bool ladder;
 	};
 
-	class fontcache
+	class laddersropes
 	{
 	public:
-		fontcache() {}
-		~fontcache();
-		void init(IDWriteFactory*);
-		IDWriteTextFormat* getfont(dwfonts);
+		laddersropes(node);
+		laddersropes() {}
+		~laddersropes() {}
+		ladderrope getlr(vector2d);
 	private:
-		unique_ptr<IDWriteFactory> fontfactory;
-		map<dwfonts, IDWriteTextFormat*> fonts;
+		vector<ladderrope> landr;
 	};
 }
 

@@ -26,6 +26,7 @@ namespace gameplay
 {
 	enum inventorytype : char
 	{
+		IT_EQUIPS = -1,
 		IT_EQUIP = 0,
 		IT_USE = 1,
 		IT_SETUP = 2,
@@ -37,6 +38,17 @@ namespace gameplay
 
 	class inventory
 	{
+	public:
+		inventory() {}
+		inventory(vector<char>, map<short, mapleequip>, map<short, mapleequip>, map<short, mapleequip>, map<char, mapleitem>, map<char, mapleitem>, map<char, mapleitem>, map<char, mapleitem>);
+		~inventory() {}
+		map<short, mapleequip>* getequipped() { return &equipped; }
+		map<short, mapleequip>* getequippedcash() { return &equippedcash; }
+		void recalcstats();
+		void removeitem(char, short);
+		float getwepmult() { return wepmultiplier; }
+		short gettotal(equipstat es) { return totalstats[es]; }
+		mapleequip* getequip(short s) { return (equipped.count(s)) ? &equipped[s] : 0; }
 	private:
 		vector<char> slots;
 		bool twohandedwep;
@@ -49,15 +61,7 @@ namespace gameplay
 		map<char, mapleitem> setupitems;
 		map<char, mapleitem> etcitems;
 		map<char, mapleitem> cashitems;
-	public:
-		inventory() {}
-		inventory(vector<char>, map<short, mapleequip>, map<short, mapleequip>, map<short, mapleequip>, map<char, mapleitem>, map<char, mapleitem>, map<char, mapleitem>, map<char, mapleitem>);
-		~inventory() {}
-		map<short, mapleequip>* getequipped() { return &equipped; }
-		map<short, mapleequip>* getequippedcash() { return &equippedcash; }
-		void recalcstats();
-		float getwepmult() { return wepmultiplier; }
-		short gettotal(equipstat es) { return totalstats[es]; }
+		SRWLOCK itemlock;
 	};
 }
 

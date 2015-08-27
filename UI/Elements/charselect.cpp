@@ -62,7 +62,7 @@ namespace io
 
 		for (char i = 0; i < chars->size(); i++)
 		{
-			nametag charname = nametag(app.getfonts()->getfont(DWF_CENTER), TXC_WHITE, nttextures, chars->at(i).getstats()->name, vector2d(55 + (120 * (i % 4)), 250 + (200 * (i > 3))), (i == 0));
+			nametag charname = nametag(app.getfonts()->getfont(DWF_CENTER), txc_white, nttextures, chars->at(i).getstats()->getname(), vector2d(55 + (120 * (i % 4)), 250 + (200 * (i > 3))), (i == 0));
 			nametags.push_back(charname);
 			buttons.insert(make_pair(BT_CHAR0 + i, button(105 + (120 * (i % 4)), 170 + (200 * (i > 3)), 50, 80)));
 			buttons[BT_CHAR0].setstate("pressed");
@@ -118,12 +118,12 @@ namespace io
 		maplestats* info = stats[selected];
 
 		lvset.draw('l', vector2d(648, 262));
-		lvset.draw(to_string(info->level), 12, cha_left, vector2d(655, 262));
+		lvset.draw(to_string(info->getstat(LEVEL)), 12, cha_left, vector2d(655, 262));
 
-		statset.draw(to_string(info->str), cha_right, vector2d(655, 385));
-		statset.draw(to_string(info->dex), cha_right, vector2d(655, 407));
-		statset.draw(to_string(info->int_), cha_right, vector2d(732, 385));
-		statset.draw(to_string(info->luk), cha_right, vector2d(732, 407));
+		statset.draw(to_string(info->getstat(STR)), cha_right, vector2d(655, 385));
+		statset.draw(to_string(info->getstat(DEX)), cha_right, vector2d(655, 407));
+		statset.draw(to_string(info->getstat(INT_)), cha_right, vector2d(732, 385));
+		statset.draw(to_string(info->getstat(LUK)), cha_right, vector2d(732, 407));
 	}
 
 	void charselect::update()
@@ -153,7 +153,7 @@ namespace io
 			return;
 		}
 
-		int cid = stats[selected]->id;
+		int cid = stats[selected]->getid();
 
 		switch (id)
 		{

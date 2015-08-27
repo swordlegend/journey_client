@@ -21,19 +21,37 @@
 
 namespace gameplay
 {
-	bool playfield::moveup()
+	bool playfield::moveup(bool keydown)
 	{
-		pair<int, string> warpinfo = portals.getportal(playerchar.getposition());
-		if (warpinfo.first == map_info.getid())
+		if (keydown)
 		{
-			vector2d spawnpos = portals.getspawnpoint(warpinfo.second);
-			playerchar.setposition(spawnpos);
+			pair<int, string> warpinfo = portals.getportal(playerchar.getposition());
+
+			if (warpinfo.first == map_info.getid())
+			{
+				vector2d spawnpos = portals.getspawnpoint(warpinfo.second);
+				playerchar.setposition(spawnpos);
+			}
+			else if (warpinfo.second.size() > 0)
+			{
+				packet_c.changemap(false, warpinfo.first, warpinfo.second, false);
+				return false;
+			}
 		}
-		else if (warpinfo.first != 0)
+
+		if (playerchar.onladderrope())
 		{
-			packet_c.changemap(false, warpinfo.first, warpinfo.second, false);
-			return false;
+			playerchar.key_up(keydown);
 		}
+		else if (keydown)
+		{
+			ladderrope lr = landr.getlr(playerchar.getposition());
+			if (lr.vertical.contains(playerchar.getposition().y()))
+			{
+				playerchar.setlr(lr);
+			}
+		}
+
 		return true;
 	}
 
@@ -46,30 +64,29 @@ namespace gameplay
 				bool left = playerchar.getleft();
 
 				pair<vector2d, vector2d> attackrange;
-				attackrange.first = playerchar.getposition();
 				if (left)
 				{
-					attackrange.second = vector2d(-100, 80);
+					attackrange.first = playerchar.getposition() - vector2d(100, 0);
+					attackrange.second = vector2d(50, 50);
 				}
 				else
 				{
-					attackrange.second = vector2d(100, 80);
+					attackrange.first = playerchar.getposition() + vector2d(25, 0);
+					attackrange.second = vector2d(50, 50);
 				}
-
-				int basedamage = playerchar.getstats()->basedamage;
 
 				attackinfo attack;
 				attack.mastery = 0.5f; //todo: get from char
 				attack.skill = 0;
 				attack.maxattacked = 1;
-				attack.display = 5;
+				attack.display = 50;
 				attack.charge = 0;
 				attack.speed = 2; //todo: wep speed of char
 				attack.direction = (left) ? 1 : 0;
 				attack.numdamage = 1;
 				attack.stance = 1; //maybe body animation?
 
-				map_objects.sendattack(&attack, basedamage, attackrange);
+				map_objects.getmobs()->sendattack(&attack, playerchar.getdamage(), attackrange);
 				packet_c.close_attack(attack);
 			}
 			else
@@ -107,7 +124,13 @@ namespace gameplay
 		{
 			backgrounds.update();
 			map_objects.update();
-			playerchar.update();
+
+			movep_info plmove = playerchar.update();
+			if (plmove.xpps != 0 || plmove.ypps != 0 || plmove.command != 0)
+			{
+				packet_c.moveplayer(plmove);
+			}
+
 			portals.update(playerchar.getposition());
 
 			for (int i = 0; i < 8; i++)
@@ -128,6 +151,7 @@ namespace gameplay
 	void playfield::setfield(int mapid, char pid)
 	{
 		step = GST_TRANSITION;
+		//bgm.Cleanup();
 
 		map_objects.clear();
 		portals.clear();
@@ -142,12 +166,14 @@ namespace gameplay
 		{
 			fullname.append("0");
 		}
+
 		node mapdata = nl::nx::nodes["Map"].resolve("Map/Map" + to_string(mapid / 100000000) + "/" + fullname.append(strid) + ".img");
 
-		map_info = mapinfo(mapid, mapdata);
-		footholds = footholdtree(mapdata.resolve("foothold"));
+		footholds = footholdtree(mapdata["foothold"]);
+		map_info = mapinfo(mapid, mapdata["info"], vector2d(footholds.getwalls()), vector2d(footholds.getborders()));
+		landr = laddersropes(mapdata["ladderRope"]);
 
-		nl::node portalnodes = mapdata.resolve("portal");
+		nl::node portalnodes = mapdata["portal"];
 		for (nl::node portalnd = portalnodes.begin(); portalnd != portalnodes.end(); portalnd++)
 		{
 			char pid = static_cast<char>(stoi(portalnd.name()));
@@ -199,6 +225,12 @@ namespace gameplay
 		playerchar.setposition(startpos);
 		view.setposition(startpos);
 		view.setbounds(map_info.getwalls(), map_info.getborders());
+
+		string path = map_info.getbgm();
+		wstring stemp = wstring(path.begin(), path.end());
+
+		//bgm.Load(stemp.c_str());
+		//bgm.Play();
 
 		step = GST_GAME;
 	}

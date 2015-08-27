@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU Affero General Public License //
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.    //
 //////////////////////////////////////////////////////////////////////////////
+#pragma once
 #include "packetcreator.h"
 
 namespace net
@@ -80,6 +81,20 @@ namespace net
 		server->dispatch(p);
 	}
 
+	void packetcreator::moveplayer(movep_info move)
+	{
+		packet p = packet(MOVE_PLAYER);
+		p.writech(move.command);
+		p.writesh(move.xpos);
+		p.writesh(move.ypos);
+		p.writesh(move.xpps);
+		p.writesh(move.ypps);
+		p.writesh(move.unk);
+		p.writech(move.newstate);
+		p.writesh(move.duration);
+		server->dispatch(p);
+	}
+
 	void packetcreator::changemap(bool died, int targetid, string targetpname, bool usewheel)
 	{
 		packet p = packet(CHANGEMAP);
@@ -87,6 +102,48 @@ namespace net
 		p.writeint(targetid);
 		p.writestr(targetpname);
 		p.writebl(usewheel);
+		server->dispatch(p);
+	}
+
+	void packetcreator::close_attack(attackinfo attack)
+	{
+		packet p = packet(CLOSE_ATTACK);
+		p.writech(0);
+
+		char numattdmg = 0;
+		numattdmg = attack.numattacked;
+		numattdmg = numattdmg << 4;
+		numattdmg = numattdmg | attack.numdamage;
+		p.writech(numattdmg);
+
+		p.writeint(attack.skill);
+		p.writeint(attack.charge);
+		p.writelg(0);
+		p.writech(attack.display);
+		p.writech(attack.direction);
+		p.writech(attack.stance);
+		p.writech(0);
+		p.writech(attack.speed);
+		p.writeint(0);
+
+		for (map<int, vector<int>>::iterator attit = attack.mobsdamaged.begin(); attit != attack.mobsdamaged.end(); ++attit)
+		{
+			p.writeint(attit->first);
+			p.writelg(0);
+			p.writeint(0);
+			p.writeint(0);
+			p.writesh(0);
+
+			for (vector<int>::iterator dmgit = attit->second.begin(); dmgit != attit->second.end(); ++dmgit)
+			{
+				p.writeint(*dmgit);
+			}
+
+			if (attack.skill != 5221004) {
+				p.writeint(0);
+			}
+		}
+
 		server->dispatch(p);
 	}
 }

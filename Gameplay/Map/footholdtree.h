@@ -22,6 +22,7 @@
 
 using namespace util;
 using namespace std;
+using namespace nl;
 
 namespace gameplay
 {
@@ -31,22 +32,30 @@ namespace gameplay
 		short next;
 		vector2d horizontal;
 		vector2d vertical;
+
+		bool iswall() { return horizontal.x() == horizontal.y(); }
+		bool isfloor() { return vertical.x() == vertical.y(); }
 	};
 
 	class footholdtree
 	{
 	public:
-		footholdtree(nl::node);
+		footholdtree(node);
 		footholdtree() {}
 		~footholdtree() {}
-		void addfoothold(short, short, short, vector2d, vector2d);
 		float getgroundbelow(vector2d);
 		float nextground(bool, vector2d);
+		vector2d getwalls();
+		vector2d getborders();
 	private:
-		map<short, struct foothold> footholds;
-		struct foothold ground;
-		struct foothold lwall;
-		struct foothold rwall;
+		map<short, foothold> footholds;
+		vector<map<short, short>> platforms;
+		vector<short> edgesl;
+		vector<short> edgesr;
+		foothold ground;
+		foothold lwall;
+		foothold rwall;
+		int lowestg;
 	};
 }
 

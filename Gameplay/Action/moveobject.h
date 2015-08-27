@@ -16,31 +16,29 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.    //
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
-#include "stdfax.h"
+#include "vector2d.h"
 
-using namespace std;
+using namespace util;
 
-namespace program
+namespace gameplay
 {
-	enum dwfonts : char
-	{
-		DWF_LEFT,
-		DWF_CENTER,
-		DWF_RIGHT,
-		DWF_LARGE,
-		dwf_small_r
-	};
-
-	class fontcache
+	class moveobject
 	{
 	public:
-		fontcache() {}
-		~fontcache();
-		void init(IDWriteFactory*);
-		IDWriteTextFormat* getfont(dwfonts);
+		moveobject(vector2d);
+		moveobject() {}
+		~moveobject() {}
+		void moveto(vector2d, int);
+		void moveabsx(int, int);
+		void moveabsy(int, int);
+		bool update();
+		vector2d getposition();
 	private:
-		unique_ptr<IDWriteFactory> fontfactory;
-		map<dwfonts, IDWriteTextFormat*> fonts;
+		vector2d destination;
+		float fx;
+		float fy;
+		float hspeed;
+		float vspeed;
 	};
 }
 

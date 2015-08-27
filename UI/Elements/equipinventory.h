@@ -19,6 +19,7 @@
 #include "stdfax.h"
 #include "uielement.h"
 #include "inventory.h"
+#include "icon.h"
 
 using namespace std;
 using namespace gameplay;
@@ -27,17 +28,18 @@ namespace io
 {
 	class equipinventory : public uielement
 	{
-	private:
-		map<short, mapleequip>* equipped;
-		map<short, mapleequip>* equippedcash;
-		bool showpet;
-		vector<sprite> petsprites;
 	public:
 		equipinventory(inventory*);
 		~equipinventory();
 		void draw(ID2D1HwndRenderTarget*);
 		void update();
 		void buttonpressed(short);
+	private:
+		vector2d* iconpositions;
+		map<short, icon> equips;
+		inventory* invent;
+		bool showpet;
+		vector<sprite> petsprites;
 	};
 }
 

@@ -52,10 +52,10 @@ namespace io
 		else
 			defaultacc = "";
 
-		textfields[TXT_ACC] = textfield(app.getfonts()->getfont(DWF_LEFT), TXC_WHITE, defaultacc, vector2d(315, 249), 12);
+		textfields[TXT_ACC] = textfield(app.getfonts()->getfont(DWF_LEFT), txc_white, defaultacc, vector2d(315, 249), 12);
 		textfields[TXT_ACC].setbg(texture(title.resolve("ID")), -5, 0);
 
-		textfields[TXT_PASS] = textfield(app.getfonts()->getfont(DWF_LEFT), TXC_WHITE, "", vector2d(315, 275), 12);
+		textfields[TXT_PASS] = textfield(app.getfonts()->getfont(DWF_LEFT), txc_white, "", vector2d(315, 275), 12);
 		textfields[TXT_PASS].setbg(texture(title.resolve("PW")), -5, 0);
 
 		if (!saveid)

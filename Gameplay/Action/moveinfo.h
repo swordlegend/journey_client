@@ -15,32 +15,18 @@
 // You should have received a copy of the GNU Affero General Public License //
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.    //
 //////////////////////////////////////////////////////////////////////////////
-#pragma once
-#include "stdfax.h"
 
-using namespace std;
-
-namespace program
+namespace gameplay
 {
-	enum dwfonts : char
+	struct movep_info
 	{
-		DWF_LEFT,
-		DWF_CENTER,
-		DWF_RIGHT,
-		DWF_LARGE,
-		dwf_small_r
-	};
-
-	class fontcache
-	{
-	public:
-		fontcache() {}
-		~fontcache();
-		void init(IDWriteFactory*);
-		IDWriteTextFormat* getfont(dwfonts);
-	private:
-		unique_ptr<IDWriteFactory> fontfactory;
-		map<dwfonts, IDWriteTextFormat*> fonts;
+		char command;
+		short xpos;
+		short ypos;
+		short xpps;
+		short ypps;
+		short unk;
+		char newstate;
+		short duration;
 	};
 }
-

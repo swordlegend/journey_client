@@ -91,6 +91,17 @@ namespace gameplay
 		}
 
 		nx::unview_file("String");
+		nx::view_file("UI");
+
+		node nametagnode = nx::nodes["UI"]["Login.img"]["CharSelect"]["nameTag"];
+		vector<texture> ntbg;
+		ntbg.push_back(texture(nametagnode.resolve("0/0")));
+		ntbg.push_back(texture(nametagnode.resolve("0/1")));
+		ntbg.push_back(texture(nametagnode.resolve("0/2")));
+		ntag = nametag(app.getfonts()->getfont(DWF_CENTER), txc_yellow, ntbg, name, vector2d());
+		ftag = nametag(app.getfonts()->getfont(DWF_CENTER), txc_yellow, ntbg, func, vector2d());
+
+		nx::unview_file("UI");
 		app.getimgcache()->unlock();
 
 		oid = o;

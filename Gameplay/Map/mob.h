@@ -19,6 +19,7 @@
 #include "stdfax.h"
 #include "animation.h"
 #include "attackinfo.h"
+#include "charset.h"
 
 using namespace std;
 using namespace util;
@@ -28,9 +29,24 @@ namespace gameplay
 {
 	class mob
 	{
+	public:
+		mob() {}
+		~mob() {}
+		mob(int, int, bool, vector2d, char, short, char, bool, char);
+		bool update();
+		void draw(ID2D1HwndRenderTarget*, vector2d);
+		void damage(attackinfo*, int);
+		void showhp(char);
+		void setmove(char, bool);
+		void setstate(string st) { state = st; }
+		void kill(char);
+		bool isalive() { return state != "die1"; }
+		vector2d getposition() { return pos; }
+		vector2d getdimension() { return textures[state].getdimension(0); }
 	private:
 		map<string, animation> textures;
 		map<string, texture> uitextures;
+		float alpha;
 		int oid;
 		string name;
 		short level;
@@ -38,31 +54,23 @@ namespace gameplay
 		char hppercent;
 		short speed;
 		vector2d pos;
+		vector2d absp;
 		vector2d walls;
 		string state;
+		bool control;
 		float moved;
 		char stance;
 		short fh;
 		char effect;
 		bool fadein;
+		bool dead;
+		bool fade;
 		bool fleft;
 		char team;
 		float hspeed;
 		float vspeed;
 		float fx;
 		float fy;
-	public:
-		mob() {}
-		~mob() {}
-		mob(int, int, vector2d, vector2d, char, short, char, bool, char);
-		bool update();
-		void draw(ID2D1HwndRenderTarget*, vector2d);
-		void damage(attackinfo*, int);
-		void showhp(char);
-		void setstate(string st) { state = st; }
-		bool isalive() { return state != "die1"; }
-		vector2d getposition() { return pos; }
-		vector2d getdimension() { return textures[state].getdimension(0); }
 	};
 }
 

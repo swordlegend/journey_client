@@ -22,7 +22,7 @@
 
 namespace gameplay
 {
-	mob::mob(int id, int o, vector2d p, vector2d w, char s, short f, char e, bool fd, char t)
+	mob::mob(int id, int o, bool con, vector2d p, char s, short f, char e, bool fd, char t)
 	{
 		app.getimgcache()->setmode(ict_map);
 		nx::view_file("Mob");
@@ -44,7 +44,7 @@ namespace gameplay
 			if (state == "info")
 			{
 				level = static_cast<short>(subnode.resolve("level").get_integer());
-				speed = 100 + static_cast<short>(subnode.resolve("level").get_integer());
+				speed = 100 + static_cast<short>(subnode.resolve("speed").get_integer());
 			}
 			else
 			{
@@ -64,24 +64,12 @@ namespace gameplay
 			name = "";
 
 		nx::unview_file("String");
-		nx::view_file("UI");
-
-		map<string, texture> uitextures;
-
-		node hpbar = nx::nodes["UI"]["UIWindow2.img"]["EnergyBar"];
-		uitextures["hpbarfront"] = texture(hpbar["w"]);
-		uitextures["hpbarmid"] = texture(hpbar["c"]);
-		uitextures["hpbarend"] = texture(hpbar["e"]);
-		uitextures["hpbarfill0"] = texture(hpbar["Gage"]["1"]["0"]);
-		uitextures["hpbarfill1"] = texture(hpbar["Gage"]["1"]["1"]);
-
-		nx::unview_file("UI");
 		app.getimgcache()->unlock();
 
 		state = "stand";
-		oid = id;
+		oid = o;
 		pos = p;
-		walls = w;
+		control = con;
 		stance = s;
 		fh = f;
 		effect = e;
@@ -95,38 +83,82 @@ namespace gameplay
 		moved = 0;
 		hspeed = 0;
 		vspeed = 0;
-		fleft = true;
+		fleft = stance == 1;
+		alpha = (fadein) ? 0.0f : 1.0f;
+		fade = false;
+		dead = false;
 	}
 
 	void mob::damage(attackinfo* attack, int basedamage)
 	{
-		vector<int> dmgnumbers;
-		long totaldamage = 0;
-
-		random_device rd;
-		uniform_int_distribution<int> udist(0, 100);
-		default_random_engine e1(rd());
-
-		for (char i = 0; i < attack->numdamage; i++)
+		if (!dead)
 		{
-			int damage = static_cast<int>(basedamage * (max(static_cast<float>(udist(e1) / 100) + attack->mastery, 1)));
-			dmgnumbers.push_back(damage);
-			totaldamage += damage;
-		}
+			vector<int> dmgnumbers;
+			long totaldamage = 0;
 
-		if (totaldamage > knockback)
+			random_device rd;
+			uniform_int_distribution<int> udist(0, 100);
+			default_random_engine e1(rd());
+
+			for (char i = 0; i < attack->numdamage; i++)
+			{
+				int damage = static_cast<int>(static_cast<float>(basedamage)* (min((static_cast<float>(udist(e1)) / 100) + attack->mastery, 1)));
+				dmgnumbers.push_back(damage);
+				totaldamage += damage;
+			}
+
+			if (totaldamage > knockback)
+			{
+				state = "hit1";
+				moved = 0;
+				hspeed = (attack->direction == 1) ? -0.1f : 0.1f;
+			}
+
+			app.getui()->getbase()->showdamage(dmgnumbers, pos - vector2d(0, textures[state].getdimension(0).y()), false, false);
+
+			attack->mobsdamaged.insert(make_pair(oid, dmgnumbers));
+		}
+	}
+
+	void mob::kill(char animation)
+	{
+		switch (animation)
 		{
-			state = "hit1";
-			moved = 0;
-			hspeed = (attack->direction == 1) ? -0.1f : 0.1f;
+		case 0:
+			fade = true;
+			alpha = 0.0f;
+			break;
+		case 1:
+			state = "die1";
+			break;
+		case 2:
+			fade = true;
+			break;
 		}
-
-		attack->mobsdamaged.insert(make_pair(oid, dmgnumbers));
+		dead = true;
 	}
 
 	void mob::showhp(char percent)
 	{
 		hppercent = percent;
+	}
+
+	void mob::setmove(char movement, bool fl)
+	{
+		float fspeed = static_cast<float>(speed) / 100;
+		fleft = fl;
+
+		switch (movement)
+		{
+		case 0:
+			state = "stand";
+			hspeed = 0;
+			break;
+		case 1:
+			state = "move";
+			hspeed = (fleft) ? -fspeed : fspeed;
+			break;
+		}
 	}
 
 	bool mob::update()
@@ -150,7 +182,7 @@ namespace gameplay
 				hspeed *= 1.25;
 			}
 		}
-		else
+		else if (control)
 		{
 			float fspeed = static_cast<float>(speed) / 100;
 
@@ -202,13 +234,32 @@ namespace gameplay
 			}
 		}
 
-		return state == "die1" && aniend;
+		if (fade)
+		{
+			alpha -= 0.05;
+			if (alpha < 0.05)
+			{
+				aniend = true;
+			}
+		}
+
+		if (fadein)
+		{
+			alpha += alpha;
+			if (alpha > 0.95)
+			{
+				alpha = 0.1f;
+				fadein = false;
+			}
+		}
+
+		return dead && aniend;
 	}
 
 	void mob::draw(ID2D1HwndRenderTarget* target, vector2d parentpos)
 	{
 		pos = vector2d(static_cast<int>(fx), static_cast<int>(fy));
-		vector2d absp = pos + parentpos;
+		absp = pos + parentpos;
 
 		if (!fleft)
 		{
@@ -220,7 +271,7 @@ namespace gameplay
 				(float)absp.y())));
 		}
 
-		textures[state].draw(target, absp);
+		textures[state].draw(target, absp, alpha);
 
 		if (!fleft)
 		{
@@ -234,11 +285,7 @@ namespace gameplay
 
 		if (hppercent > 1)
 		{
-			vector2d overhead = absp - vector2d(30, textures[state].getdimension(0).y() + 25);
-			uitextures["hpbarfront"].draw(overhead);
-			uitextures["hpbarmid"].draw(overhead + vector2d(5, 0), vector2d(50, 0));
-			uitextures["hpbarend"].draw(overhead + vector2d(55, 0));
-			uitextures["hpbarfill1"].draw(overhead + vector2d(2, 2), vector2d(hppercent/4, 0));
+			app.getui()->getbase()->drawmobhp(hppercent, absp - vector2d(30, textures[state].getdimension(0).y() + 25));
 		}
 	}
 }

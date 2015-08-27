@@ -40,11 +40,12 @@ void CALLBACK Update(PVOID lpParam, BOOLEAN TimerOrWaitFired) {
 	if (WaitForSingleObject(gTimerStopEvent, 1) != WAIT_TIMEOUT)
 	{
 		SetEvent(gTimerDoneEvent);
-		return;
 	}
-	WaitForSingleObject(gTimerDoneEvent, DPF);
-	app.getui()->update();
-	SetEvent(gTimerDoneEvent);
+	else
+	{
+		app.getui()->update();
+		SetEvent(gTimerDoneEvent);
+	}
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
@@ -73,9 +74,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 				MSG winmsg;
 				while (result == 0)
 				{
-					WaitForSingleObject(gTimerDoneEvent, DPF);
-
 					result = server.receive();
+
+					WaitForSingleObject(gTimerDoneEvent, DPF);
 
 					if (GetMessage(&winmsg, NULL, 0, 0))
 					{

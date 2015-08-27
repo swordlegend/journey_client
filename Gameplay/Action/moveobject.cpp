@@ -15,82 +15,62 @@
 // You should have received a copy of the GNU Affero General Public License //
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.    //
 //////////////////////////////////////////////////////////////////////////////
-#include "itemdrop.h"
+#include "moveobject.h"
 
 namespace gameplay
 {
-	itemdrop::itemdrop(int id, bool mes, vector2d pos, vector2d dest, int o, int own, char put, bool pld)
+	moveobject::moveobject(vector2d pos)
 	{
-		if (!mes)
-		{
-			ico = icon(id, true);
-		}
-		move = moveobject(pos);
-		oid = o;
-		itemid = id;
-		owner = own;
-		meso = mes;
-		pickuptype = put;
-		playerdrop = pld;
-		alpha = 1.0f;
-		pickedup = false;
+		fx = static_cast<float>(pos.x());
+		fy = static_cast<float>(pos.y());
+		hspeed = 0;
 		vspeed = 0;
-
-		if (pos == dest)
-		{
-			borders = vector2d(pos.y() - 10, pos.y() + 10);
-			floating = true;
-			//move.moveabsy(borders.y(), 10);
-		}
-		else
-		{
-			borders = vector2d();
-			floating = false;
-			move.moveto(dest, 10);
-		}
 	}
 
-	void itemdrop::draw(ID2D1HwndRenderTarget* target, vector2d viewpos)
+	void moveobject::moveto(vector2d dst, int speed)
 	{
-		if (!meso)
-		{
-			ico.draw(viewpos + move.getposition(), alpha);
-		}
+		vector2d delta = dst - vector2d(static_cast<int>(fx), static_cast<int>(fy));
+		hspeed = speed * static_cast<float>(delta.x()) / 60;
+		vspeed = speed * static_cast<float>(delta.y()) / 60;
+		destination = dst;
 	}
 
-	bool itemdrop::update()
+	void moveobject::moveabsx(int xdst, int speed)
 	{
-		if (pickedup)
-		{
-			alpha = alpha - 0.05f;
-		}
-		else
-		{
-			bool fin = move.update();
+		int delta = xdst - static_cast<int>(fx);
+		hspeed = speed * static_cast<float>(delta) / 60;
+		destination = vector2d(xdst, static_cast<int>(fy));
+	}
 
-			if (fin)
-			{
-				if (floating)
-				{
-					if (move.getposition().y() == borders.x())
-					{
-						//move.moveabsy(borders.y(), 5);
-					}
-					else if (move.getposition().y() == borders.y())
-					{
-						//move.moveabsy(borders.x(), 5);
-					}
-				}
-				else
-				{
-					vector2d pos = move.getposition();
-					borders = vector2d(pos.y() - 10, pos.y() + 10);
-					floating = true;
-					//move.moveabsy(borders.y(), 5);
-				}
-			}
+	void moveobject::moveabsy(int ydst, int speed)
+	{
+		int delta = ydst - static_cast<int>(fy);
+		vspeed = speed * static_cast<float>(delta) / 60;
+		destination = vector2d(static_cast<int>(fx), ydst);
+	}
+
+	bool moveobject::update()
+	{
+		fx += hspeed;
+		fy += vspeed;
+
+		if (abs(destination.x() - static_cast<int>(fx)) <= abs(hspeed) * 2)
+		{
+			hspeed = 0;
+			fx = static_cast<float>(destination.x());
 		}
 
-		return pickedup && alpha < 0.05f;
+		if (abs(destination.y() - static_cast<int>(fy)) <= abs(hspeed) * 2)
+		{
+			vspeed = 0;
+			fy = static_cast<float>(destination.y());
+		}
+
+		return hspeed == 0 && vspeed == 0;
+	}
+
+	vector2d moveobject::getposition()
+	{
+		return vector2d(static_cast<int>(fx), static_cast<int>(fy));
 	}
 }

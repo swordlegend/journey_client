@@ -16,31 +16,53 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.    //
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
-#include "stdfax.h"
+#include "uielement.h"
+#include "charset.h"
 
-using namespace std;
-
-namespace program
+namespace io
 {
-	enum dwfonts : char
+	struct dmgeffect
 	{
-		DWF_LEFT,
-		DWF_CENTER,
-		DWF_RIGHT,
-		DWF_LARGE,
-		dwf_small_r
+		vector<int> numbers;
+		char visible;
+		float alpha;
+		float fy;
+		vector2d position;
+		vector2d destination;
+		bool toplayer;
+		bool crit;
 	};
 
-	class fontcache
+	struct statusinfo
+	{
+		bool white;
+		string text;
+		float alpha;
+	};
+
+	class baseinterface : public uielement
 	{
 	public:
-		fontcache() {}
-		~fontcache();
-		void init(IDWriteFactory*);
-		IDWriteTextFormat* getfont(dwfonts);
+		baseinterface() {}
+		~baseinterface() {}
+		void init();
+		void addstatusinfo(bool, string);
+		void showdamage(vector<int>, vector2d, bool, bool);
+		void draw(ID2D1HwndRenderTarget*, vector2d);
+		void drawmobhp(char, vector2d);
+		void drawnpctag(string, string, vector2d);
+		void update();
 	private:
-		unique_ptr<IDWriteFactory> fontfactory;
-		map<dwfonts, IDWriteTextFormat*> fonts;
+		charset dmgset;
+		charset critset;
+		charset playerdmgset;
+		nametag npctag;
+		textlabel infotextw;
+		textlabel infotexty;
+		map<string, texture> mobhpbar;
+		vector<dmgeffect> dmgeffects;
+		vector<statusinfo> statusinfos;
+		SRWLOCK dmglock;
 	};
 }
 

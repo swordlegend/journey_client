@@ -21,33 +21,22 @@
 
 namespace gameplay
 {
-	mapbackgrounds::mapbackgrounds(nl::node bgnodes, vector2d mapwalls, vector2d mapborders)
+	mapbackgrounds::mapbackgrounds(node bgnodes, vector2d mapwalls, vector2d mapborders)
 	{
-		nl::node back = nl::nx::nodes["Back"].resolve("Back/");
+		node back = nx::nodes["Back"]["Back"];
 
-		for (nl::node backnode = bgnodes.begin(); backnode != bgnodes.end(); backnode++)
+		for (node backnode = bgnodes.begin(); backnode != bgnodes.end(); ++backnode)
 		{
-			string bS = backnode.resolve("bS").get_string();
-			if (!bS.empty())
+			if (!backnode["bS"].get_string().empty())
 			{
-				char layer = static_cast<char>(stoi(backnode.name()));
-				bgtype type = static_cast<bgtype>(backnode.resolve("type").get_integer());
-				bool ani = backnode.resolve("ani").get_bool();
-				bool f = backnode.resolve("f").get_bool();
-
-				nl::node spritenode = back.resolve(bS + ".img/" + ((ani) ? "ani/" : "back/") + to_string(backnode.resolve("no").get_integer()));
-
-				vector2d pos = vector2d(backnode.resolve("x").get_integer(), backnode.resolve("y").get_integer());
-				vector2d rpos = vector2d(backnode.resolve("rx").get_integer(), backnode.resolve("ry").get_integer());
-				vector2d cpos = vector2d(backnode.resolve("cx").get_integer(), backnode.resolve("cy").get_integer());
-				byte alpha = static_cast<byte>(backnode.resolve("a").get_integer());
-
-				background bgobj = background(animation(spritenode), type, f, pos, rpos, cpos, mapwalls, mapborders, alpha);
-
-				if (backnode.resolve("front").get_bool())
-					foregrounds.push_back(bgobj);
+				if (backnode["front"].get_bool())
+				{
+					foregrounds.push_back(background(backnode, back, mapwalls, mapborders));
+				}
 				else
-					backgrounds.push_back(bgobj);
+				{
+					backgrounds.push_back(background(backnode, back, mapwalls, mapborders));
+				}
 			}
 		}
 	}

@@ -73,16 +73,16 @@ namespace io
 	{
 		uielement::draw(target);
 
-		exp.draw(target, position, stats->exp / 10, stats->exp);
-		hp.draw(target, position, stats->hp, stats->mhp);
-		mp.draw(target, position, stats->mp, stats->mmp);
+		exp.draw(target, position, stats->getexp(), stats->getexpneeded());
+		hp.draw(target, position, stats->getstat(HP), stats->getstat(MAXHP));
+		mp.draw(target, position, stats->getstat(MP), stats->getstat(MAXMP));
 
-		string exppercent = to_string(((double)stats->exp) / (((double)stats->exp) / 10));
-		statset.draw(to_string(stats->exp) + "[" + exppercent.substr(0, exppercent.find('.') + 3) + "%]", cha_right, position + vector2d(47, -13));
-		statset.draw("[" + to_string(stats->hp) + "/" + to_string(stats->mhp) + "]", cha_right, position + vector2d(-124, -29));
-		statset.draw("[" + to_string(stats->mp) + "/" + to_string(stats->mmp) + "]", cha_right, position + vector2d(47, -29));
+		string exppercent = to_string(((double)stats->getexp()) / (((double)stats->getexpneeded())) * 100);
+		statset.draw(to_string(stats->getexp()) + "[" + exppercent.substr(0, exppercent.find('.') + 3) + "%]", cha_right, position + vector2d(47, -13));
+		statset.draw("[" + to_string(stats->getstat(HP)) + "/" + to_string(stats->getstat(MAXHP)) + "]", cha_right, position + vector2d(-124, -29));
+		statset.draw("[" + to_string(stats->getstat(MP)) + "/" + to_string(stats->getstat(MAXMP)) + "]", cha_right, position + vector2d(47, -29));
 
-		lvset.draw(to_string(stats->level), cha_left, position + vector2d(-495, -25));
+		lvset.draw(to_string(stats->getstat(LEVEL)), cha_left, position + vector2d(-495, -25));
 	}
 
 	void statusbar::update()

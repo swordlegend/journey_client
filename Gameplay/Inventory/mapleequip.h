@@ -42,8 +42,13 @@ namespace gameplay
 		ES_JUMP
 	};
 
-	class mapleequip : mapleitem
+	class mapleequip : public mapleitem
 	{
+	public:
+		mapleequip() {}
+		~mapleequip() {}
+		mapleequip(short, char, int, bool, long, long, char, char, map<equipstat, short>,string, short, char, short, int);
+		short getstat(equipstat es) { return stats[es]; }
 	private:
 		char slots;
 		char level;
@@ -53,11 +58,6 @@ namespace gameplay
 		char itemlevel;
 		short itemexp;
 		int vicious;
-	public:
-		mapleequip() {}
-		~mapleequip() {}
-		mapleequip(short, char, int, bool, long, long, char, char, map<equipstat, short>,string, short, char, short, int);
-		short getstat(equipstat es) { return stats[es]; }
 	};
 }
 

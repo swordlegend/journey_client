@@ -26,39 +26,6 @@ namespace gameplay
 		objlock = SRWLOCK_INIT;
 	}
 
-	void mapobjects::sendattack(attackinfo* attack, int basedamage, pair<vector2d, vector2d> range)
-	{
-		attack->numattacked = 0;
-
-		AcquireSRWLockShared(&objlock);
-		for (map<int, mob>::iterator mobit = mobs.begin(); mobit != mobs.end(); ++mobit)
-		{
-			if (colliding(make_pair(mobit->second.getposition(), mobit->second.getdimension()), range) && mobit->second.isalive())
-			{
-				mobit->second.damage(attack, basedamage);
-				attack->numattacked++;
-
-				if (attack->numattacked >= attack->maxattacked)
-					break;
-			}
-		}
-		ReleaseSRWLockShared(&objlock);
-	}
-
-	void mapobjects::sendmobhp(int oid, char percentage)
-	{
-		AcquireSRWLockShared(&objlock);
-		mobs[oid].showhp(percentage);
-		ReleaseSRWLockShared(&objlock);
-	}
-
-	void mapobjects::killmob(int oid, int animation)
-	{
-		AcquireSRWLockShared(&objlock);
-		mobs[oid].setstate("die1");
-		ReleaseSRWLockShared(&objlock);
-	}
-
 	void mapobjects::removedrop(int oid)
 	{
 		AcquireSRWLockShared(&objlock);
@@ -71,14 +38,6 @@ namespace gameplay
 		AcquireSRWLockExclusive(&objlock);
 		objects[oid] = MOT_NPC;
 		npcs[oid] = toadd;
-		ReleaseSRWLockExclusive(&objlock);
-	}
-
-	void mapobjects::addmob(int oid, mob toadd)
-	{
-		AcquireSRWLockExclusive(&objlock);
-		objects[oid] = MOT_MOB;
-		mobs[oid] = toadd;
 		ReleaseSRWLockExclusive(&objlock);
 	}
 
@@ -111,6 +70,8 @@ namespace gameplay
 
 	void mapobjects::draw(ID2D1HwndRenderTarget* target, vector2d viewpos)
 	{
+		mobs.draw(target, viewpos);
+
 		if (TryAcquireSRWLockShared(&objlock))
 		{
 			for (map<int, npc>::iterator npcit = npcs.begin(); npcit != npcs.end(); ++npcit)
@@ -120,10 +81,6 @@ namespace gameplay
 			for (map<int, reactor>::iterator reacit = reactors.begin(); reacit != reactors.end(); ++reacit)
 			{
 				//reacit->second.draw(target, viewpos);
-			}
-			for (map<int, mob>::iterator mobit = mobs.begin(); mobit != mobs.end(); ++mobit)
-			{
-				mobit->second.draw(target, viewpos);
 			}
 			for (map<int, itemdrop>::iterator drpit = drops.begin(); drpit != drops.end(); ++drpit)
 			{
@@ -138,6 +95,8 @@ namespace gameplay
 	{
 		vector<int> toremove;
 
+		mobs.update();
+
 		if (TryAcquireSRWLockShared(&objlock))
 		{
 			for (map<int, npc>::iterator npcit = npcs.begin(); npcit != npcs.end(); ++npcit)
@@ -148,17 +107,8 @@ namespace gameplay
 			{
 				//reacit->second.draw(target, viewpos);
 			}
-			for (map<int, mob>::iterator mobit = mobs.begin(); mobit != mobs.end(); ++mobit)
-			{
-				bool died = mobit->second.update();
 
-				if (died)
-				{
-					toremove.push_back(mobit->first);
-				}
-			}
-
-			/*for (map<int, itemdrop>::iterator drpit = drops.begin(); drpit != drops.end(); ++drpit)
+			for (map<int, itemdrop>::iterator drpit = drops.begin(); drpit != drops.end(); ++drpit)
 			{
 				bool removed = drpit->second.update();
 
@@ -166,7 +116,7 @@ namespace gameplay
 				{
 					toremove.push_back(drpit->first);
 				}
-			}*/
+			}
 
 			ReleaseSRWLockShared(&objlock);
 		}
@@ -181,9 +131,6 @@ namespace gameplay
 
 				switch (type)
 				{
-				case MOT_MOB:
-					mobs.erase(oid);
-					break;
 				case MOT_REACTOR:
 					reactors.erase(oid);
 					break;

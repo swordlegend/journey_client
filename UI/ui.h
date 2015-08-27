@@ -21,6 +21,7 @@
 #include "uielement.h"
 #include "cursor.h"
 #include "keyboard.h"
+#include "baseinterface.h"
 
 using namespace std;
 using namespace util;
@@ -49,9 +50,11 @@ namespace io
 		textfield* getactivetext();
 		keyboard* getkeyboard();
 		playfield* getfield() { return &field; }
+		baseinterface* getbase() { return &base; }
 	private:
 		map<char, uielement*> elements;
 		playfield field;
+		baseinterface base;
 		cursor mouse;
 		keyboard keys;
 		textfield* activetext;

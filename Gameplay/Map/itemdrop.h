@@ -18,6 +18,7 @@
 #pragma once
 #include "stdfax.h"
 #include "icon.h"
+#include "moveobject.h"
 
 using namespace graphics;
 
@@ -34,8 +35,7 @@ namespace gameplay
 		void expire() { pickedup = true; }
 	private:
 		icon ico;
-		vector2d position;
-		vector2d destination;
+		moveobject move;
 		vector2d borders;
 		int oid;
 		int itemid;

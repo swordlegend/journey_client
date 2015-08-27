@@ -20,17 +20,20 @@
 
 namespace io
 {
-	nametag::nametag() {}
-	nametag::~nametag() {}
-
 	nametag::nametag(IDWriteTextFormat* fnt, textcolor col, pair<vector<texture>, vector<texture>> t, string n, vector2d p, bool a)
 	{
-		font = fnt;
-		color = col;
+		content = textlabel(fnt, col, n);
 		tag = t;
-		name = n;
 		position = p;
 		active = a;
+	}
+
+	nametag::nametag(IDWriteTextFormat* fnt, textcolor col, vector<texture> t, string n, vector2d p)
+	{
+		content = textlabel(fnt, col, n);
+		tag.first = t;
+		position = p;
+		active = false;
 	}
 
 	void nametag::draw(ID2D1HwndRenderTarget* target, vector2d parentpos)
@@ -42,7 +45,7 @@ namespace io
 		{
 			tag.first[0].draw(bgpos);
 			char i;
-			for (i = 0; i < name.length() / 3; i++)
+			for (i = 0; i < content.gettext().length() / 3; i++)
 			{
 				tag.first[1].draw(bgpos + vector2d(8 + 9 * i, 0));
 			}
@@ -52,41 +55,13 @@ namespace io
 		{
 			tag.second[0].draw(bgpos);
 			char i;
-			for (i = 0; i < name.length() / 3; i++)
+			for (i = 0; i < content.gettext().length() / 3; i++)
 			{
 				tag.second[1].draw(bgpos + vector2d(8 + 9 * i, 0));
 			}
 			tag.second[2].draw(bgpos + vector2d(8 + 9 * i, 0));
 		}
 
-		D2D1_RECT_F layoutRect = D2D1::RectF(
-			static_cast<FLOAT>(absp.x()),
-			static_cast<FLOAT>(absp.y()),
-			static_cast<FLOAT>(absp.x() + (12 * name.length())),
-			static_cast<FLOAT>(absp.y() + 24)
-			);
-
-		std::wstring wide_string(name.begin(), name.end());
-
-		ID2D1SolidColorBrush* brush = 0;
-		switch (color)
-		{
-		case TXC_WHITE:
-			target->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &brush);
-			break;
-		case TXC_BLACK:
-			target->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &brush);
-			break;
-		}
-
-		target->DrawText(
-			wide_string.c_str(),
-			wide_string.length(),
-			font,
-			layoutRect,
-			brush
-			);
-
-		brush->Release();
+		content.draw(target, absp + vector2d(-13, 0));
 	}
 }

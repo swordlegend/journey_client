@@ -32,6 +32,7 @@ namespace io
 		uilock = SRWLOCK_INIT;
 
 		mouse.init();
+		base.init();
 
 		shift = false;
 		actionsenabled = true;
@@ -59,18 +60,15 @@ namespace io
 			break;
 		case UI_LOGINNOTICE:
 			toadd = new loginnotice(param);
-			actionsenabled = true;
 			break;
 		case UI_LOGINWAIT:
 			toadd = new loginwait();
 			break;
 		case UI_WORLDSELECT:
 			toadd = new worldselect(field.getworlds()->at(0).getchannels(), field.getworlds()->at(0).getchloads());
-			actionsenabled = true;
 			break;
 		case UI_CHARSEL:
 			toadd = new charselect(field.getaccount()->getslots(), field.getaccount()->getchars());
-			actionsenabled = true;
 			break;
 		case UI_STATUSBAR:
 			toadd = new statusbar(field.getplayer()->getstats());
@@ -97,6 +95,7 @@ namespace io
 	void ui::draw(ID2D1HwndRenderTarget* target)
 	{
 		field.draw(target);
+		base.draw(target, field.getviewpos());
 		if (TryAcquireSRWLockShared(&uilock))
 		{
 			for (map<char, uielement*>::iterator elit = elements.begin(); elit != elements.end(); elit++)
@@ -111,6 +110,7 @@ namespace io
 	void ui::update()
 	{
 		field.update();
+		base.update();
 		if (TryAcquireSRWLockShared(&uilock))
 		{
 			for (map<char, uielement*>::iterator elit = elements.begin(); elit != elements.end(); elit++)
@@ -162,19 +162,16 @@ namespace io
 		switch (keycode)
 		{
 		case VK_LEFT:
-			field.getplayer()->move(MC_LEFT, down);
+			field.getplayer()->key_left(down);
 			break;
 		case VK_RIGHT:
-			field.getplayer()->move(MC_RIGHT, down);
+			field.getplayer()->key_right(down);
 			break;
 		case VK_UP:
-			if (down)
-			{
-				actionsenabled = field.moveup();
-			}
+			actionsenabled = field.moveup(down);
 			break;
 		case VK_DOWN:
-			field.getplayer()->crouch(down);
+			field.getplayer()->key_down(down);
 			break;
 		default:
 			pair<keytype, int> mapping = keys.getaction(keycode);
@@ -215,7 +212,7 @@ namespace io
 				switch (action)
 				{
 				case KA_JUMP:
-					field.getplayer()->move(MC_JUMP, down);
+					field.getplayer()->key_jump(down);
 					break;
 				case KA_SIT:
 					break;

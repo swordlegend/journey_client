@@ -19,10 +19,7 @@
 
 namespace gameplay
 {
-	maplestats::maplestats(){}
-	maplestats::~maplestats(){}
-
-	maplestats::maplestats(int i, std::string nm, bool fem, char sk, int fc, int hr, std::vector<long> pets, short lv, short jb, short st, short dx, short it, short lk, short h, short mh, short m, short mm, short ra, short rs, int ep, short fm, int mi, char spa)
+	maplestats::maplestats(int i, std::string nm, bool fem, short sk, int fc, int hr, int ep, short fm, map<maplestat, short> st, pair<int, char> wi, vector<long> pets)
 	{
 		id = i;
 		name = nm;
@@ -30,23 +27,15 @@ namespace gameplay
 		skin = sk;
 		face = fc;
 		hair = hr;
-		petids = pets;
-		level = lv;
-		job = jb;
-		str = st;
-		dex = dx;
-		int_ = it;
-		luk = lk;
-		hp = h;
-		mhp = mh;
-		mp = m;
-		mmp = mm;
-		ap = ra;
-		sp = rs;
 		exp = ep;
 		fame = fm;
-		map = mi;
-		spawnp = spa;
-		basedamage = 0;
+		stats = st;
+		spawninfo = wi;
+		petids = pets;
+	}
+
+	short maplestats::getstat(maplestat s) 
+	{ 
+		return (stats.count(s)) ? stats[s] : 0;
 	}
 }

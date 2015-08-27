@@ -18,7 +18,7 @@
 #pragma once
 #include "stdfax.h"
 #include "texture.h"
-#include "textfield.h"
+#include "textlabel.h"
 
 using namespace graphics;
 
@@ -26,18 +26,17 @@ namespace io
 {
 	class nametag
 	{
-	private:
-		IDWriteTextFormat* font;
-		textcolor color;
-		pair<vector<texture>, vector<texture>> tag;
-		string name;
-		vector2d position;
-		bool active;
 	public:
-		nametag();
-		~nametag();
+		nametag() {}
+		~nametag() {}
+		nametag(IDWriteTextFormat* fnt, textcolor col, vector<texture> t, string n, vector2d p);
 		nametag(IDWriteTextFormat*, textcolor, pair<vector<texture>, vector<texture>>, string, vector2d, bool);
 		void draw(ID2D1HwndRenderTarget*, vector2d);
+	private:
+		textlabel content;
+		pair<vector<texture>, vector<texture>> tag;
+		vector2d position;
+		bool active;
 	};
 }
 

@@ -104,6 +104,8 @@ namespace gameplay
 
 	bool maplelook::update()
 	{
+		bool aniend = false;
+
 		elapsed += 16;
 
 		short delay = bodydelays[state][frame];
@@ -114,6 +116,8 @@ namespace gameplay
 
 			if (frame == 0)
 			{
+				aniend = true;
+
 				if (state == "stabO1")
 				{
 					state = "stand1";
@@ -137,7 +141,7 @@ namespace gameplay
 			}
 		}
 
-		return frame == 0;
+		return aniend;
 	}
 
 	void maplelook::setposition(vector2d pos)
@@ -155,9 +159,13 @@ namespace gameplay
 	{
 		if (st == "stand1" && twohweapon)
 			st = "stand2";
-		frame = 0;
-		elapsed = 0;
-		state = st;
+
+		if (state != st)
+		{
+			frame = 0;
+			elapsed = 0;
+			state = st;
+		}
 	}
 
 	void maplelook::setexpression(char exp)

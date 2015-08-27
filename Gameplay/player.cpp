@@ -19,14 +19,12 @@
 
 namespace gameplay
 {
-	player::player() {}
-	player::~player() {}
-
-	player::player(maplechar* ch, inventory inv, map<int, pair<pair<int, int>, long>> skil, map<int, short> cd, map<int, pair<string, pair<short, string>>> quest, map<int, long> cquest, pair<vector<int>, vector<int>> trock, int cov, map<short, char> mb, map<short, string> area)
+	player::player(maplechar* ch, inventory inv, int meso, map<int, pair<pair<int, int>, long>> skil, map<int, short> cd, map<int, pair<string, pair<short, string>>> quest, map<int, long> cquest, pair<vector<int>, vector<int>> trock, int cov, map<short, char> mb, map<short, string> area)
 	{
 		look = ch->copylook();
 		stats = ch->copystats();
 		invent = inv;
+		stats.setmeso(meso);
 
 		recalcstats(true);
 
@@ -40,12 +38,20 @@ namespace gameplay
 		areainfo = area;
 		hspeed = 0;
 		vspeed = 0;
-		movestate = MC_NONE;
-		standing = true;
+		state = mst_stand;
+		ladrrope = ladderrope();
+		ladrrope.vertical = vector2d();
+		ladrrope.ladder = false;
 		nofriction = false;
 		attacking = false;
 		fleft = true;
 		look.setfleft(true);
+		candjump = true;
+
+		for (moveinput i = min_left; i <= min_attack; i = static_cast<moveinput>(i + 1))
+		{
+			keydown[i] = false;
+		}
 	}
 
 	maplestats* player::getstats()
@@ -78,12 +84,14 @@ namespace gameplay
 		vspeed = 0;
 
 		ground = footholds->getgroundbelow(position);
-		standing = position.y() >= ground;
-
-		if (standing)
-			look.setstate("stand1");
-		else
-			look.setstate("jump");
+		if (ground > fy)
+		{
+			state = mst_fall;
+		}
+		else if (state == mst_climb)
+		{
+			state = mst_stand;
+		}
 	}
 
 	void player::setexpression(char exp)
@@ -93,186 +101,405 @@ namespace gameplay
 
 	void player::draw(ID2D1HwndRenderTarget* target, vector2d parentpos)
 	{
-		if (fleft)
-		{
-			fx = fx - hspeed;
-		}
-		else
-		{
-			fx = fx + hspeed;
-		}
-
+		fx = fx + hspeed;
 		fy = fy + vspeed;
 
-		position = vector2d((int)fx, (int)fy);
+		position = vector2d(static_cast<int>(fx), static_cast<int>(fy));
 		look.draw(target, parentpos + position);
 	}
 
-	void player::update()
+	movep_info player::update()
 	{
+		movep_info ret;
+
 		bool anidone = look.update();
 
-		if (anidone && attacking)
-		{
-			attacking = false;
-		}
+		float fspeed = walkSpeed * static_cast<float>(speed) / 100;
 
-		float fspeed = ((float)speed / 100) * walkSpeed;
-		float fjump = ((float)jump / 100);
-
-		if (movestate % MC_JUMP != 0)
+		if (state == mst_climb)
 		{
-			hspeed = hspeed + (fspeed / 10);
-			if (hspeed > fspeed * 1.5)
-				hspeed = static_cast<float>(fspeed * 1.5);
-		}
+			if (keydown[min_up])
+			{
+				vspeed = -fspeed;
+			}
+			else if (keydown[min_crouch])
+			{
+				vspeed = fspeed;
+			}
+			else
+			{
+				vspeed = 0;
+			}
 
-		if (!nofriction)
-		{
-			hspeed -= (standing)? 0.08f : 0.05f;
-			if (hspeed < 0)
-				hspeed = 0;
-		}
-
-		
-		if (vspeed > 0)
-		{
-			ground = footholds->getgroundbelow(position);
-		}
-		else if (hspeed > 0)
-		{
-			ground = footholds->nextground(fleft, position);
-			standing = position.y() >= ground;
-		}
-
-		if (!standing)
-		{
-			vspeed = vspeed + gravityAcc;
-			if (vspeed > fallspeed)
-				vspeed = fallspeed;
-
-			movestate = movestate | MC_JUMP;
-			look.setstate("jump");
+			float cfriction = 0.01f;
 
 			if (vspeed > 0)
 			{
-				if (fy + vspeed > ground)
+				vspeed -= cfriction;
+				vspeed = max(vspeed, 0);
+			}
+			else if (vspeed < 0)
+			{
+				vspeed += cfriction;
+				vspeed = min(vspeed, 0);
+			}
+
+			if (fy + vspeed > ladrrope.vertical.y() || fy + vspeed < ladrrope.vertical.x())
+			{
+				state = mst_fall;
+			}
+		}
+		else
+		{
+			if (state != mst_attack && state != mst_prone)
+			{
+				float maxhspeed = (candjump) ? fspeed * 1.5 : fspeed * 3;
+
+				if (keydown[min_left])
+				{
+					hspeed = hspeed - (fspeed / 10);
+					hspeed = max(hspeed, -maxhspeed);
+				}
+				else if (hspeed < 0)
+				{
+					hspeed += 0.13f;
+					hspeed = min(hspeed, 0);
+				}
+
+				if (keydown[min_right])
+				{
+					hspeed = hspeed + (fspeed / 10);
+					hspeed = min(hspeed, maxhspeed);
+				}
+				else if (hspeed > 0)
+				{
+					hspeed -= 0.13f;
+					hspeed = max(hspeed, 0);
+				}
+			}
+
+			if (hspeed != 0 && !nofriction)
+			{
+				float friction;
+
+				switch (state)
+				{
+				case mst_attack:
+					friction = 0.2f;
+					break;
+				case mst_prone:
+				case mst_stand:
+				case mst_climb:
+				case mst_walk:
+					friction = 0.08f;
+					break;
+				case mst_fall:
+					friction = 0.01f;
+					break;
+				}
+
+				if (hspeed > 0)
+				{
+					hspeed -= friction;
+					hspeed = max(hspeed, 0);
+				}
+				else if (hspeed < 0)
+				{
+					hspeed += friction;
+					hspeed = min(hspeed, 0);
+				}
+			}
+
+			if (hspeed != 0 && vspeed == 0)
+			{
+				ground = footholds->nextground(hspeed < 0, position);
+				if (abs(ground - fy) <= 7)
+				{
+					fy = ground;
+				}
+			}
+			else if (vspeed != 0)
+			{
+				ground = footholds->getgroundbelow(position);
+			}
+
+			if (ground != fy)
+			{
+				vspeed = vspeed + gravityAcc;
+				vspeed = min(vspeed, fallspeed);
+
+				if (state != mst_attack)
+				{
+					state = mst_fall;
+				}
+			}
+
+			if (vspeed != 0)
+			{
+				if (fy + vspeed * 2 >= ground && ground >= fy)
 				{
 					vspeed = 0;
 					fy = ground;
-					standing = true;
+					candjump = true;
 
-					movestate = movestate ^ MC_JUMP;
-
-					if (hspeed != 0)
+					if (state != mst_attack)
 					{
-						look.setstate("walk1");
-					}
-					else
-					{
-						look.setstate("stand1");
-					}
-				}
-			}
-		}
-		else
-		{
-			if (hspeed != 0 && vspeed == 0 && look.getstate() != "walk1")
-				look.setstate("walk1");
-			else if (hspeed == 0 && vspeed == 0 && look.getstate() == "walk1")
-				look.setstate("stand1");
-		}
-	}
-
-	void player::crouch(bool keydown)
-	{
-		if (standing && !attacking)
-		{
-			if (keydown)
-			{
-				hspeed = 0;
-				look.setstate("prone");
-				movestate = MC_CROUCH;
-			}
-			else if (movestate == MC_CROUCH)
-			{
-				look.setstate("stand1");
-				movestate = movestate ^ MC_CROUCH;
-			}
-		}
-	}
-
-	void player::move(movecode type, bool keydown)
-	{
-		short newstate = MC_NONE;
-
-		if (attacking)
-			return;
-
-		if (keydown)
-		{
-			newstate = movestate | type;
-
-			bool newleft = fleft;
-			switch (newstate ^ movestate)
-			{
-			case MC_LEFT:
-				newleft = true;
-				if ((movestate & MC_RIGHT) != MC_NONE)
-					newstate = newstate ^ MC_RIGHT;
-				break;
-			case MC_RIGHT:
-				newleft = false;
-				if ((movestate & MC_LEFT) != MC_NONE)
-					newstate = newstate ^ MC_LEFT;
-				break;
-			case MC_JUMP:
-				if (standing)
-				{
-					standing = false;
-					look.setstate("jump");
-					if (movestate == MC_CROUCH)
-					{
-						float gbelow = footholds->getgroundbelow(position + vector2d(0, 5));
-						if (gbelow > ground && gbelow - ground < 1000)
+						if (keydown[min_left] || keydown[min_right])
 						{
-							setposition(position + vector2d(0, 5));
-							newstate = MC_JUMP;
+							state = mst_walk;
+						}
+						else if (keydown[min_crouch])
+						{
+							state = mst_prone;
 						}
 						else
 						{
-							vspeed = -(jumpSpeed * ((float)jump) / 100);
+							state = mst_stand;
 						}
 					}
-					else
-					{
-						vspeed = -(jumpSpeed * ((float)jump) / 100);
-					}
+				}
+			}
+		}
+
+		if (anidone)
+		{
+			switch (state)
+			{
+			case mst_attack:
+				state = (vspeed == 0) ? mst_stand : mst_fall;
+				if (keydown[min_left])
+				{
+					fleft = true;
+				}
+				if (keydown[min_right])
+				{
+					fleft = false;
 				}
 				break;
 			}
+		}
 
-			if (newleft != fleft)
+		look.setfleft(fleft);
+
+		switch (state)
+		{
+		case mst_stand:
+			if (hspeed == 0)
 			{
-				fleft = newleft;
-				look.setfleft(newleft);
-				hspeed = 0;
+				look.setstate("stand1");
+			}
+			else
+			{
+				look.setstate("walk1");
+			}
+			break;
+		case mst_walk:
+			look.setstate("walk1");
+			break;
+		case mst_fall:
+			look.setstate("jump");
+			break;
+		case mst_prone:
+			look.setstate("prone");
+			break;
+		case mst_climb:
+			look.setstate((ladrrope.ladder)? "ladder" : "rope");
+			break;
+		case mst_attack:
+			look.setstate("stabO1");
+			break;
+		}
+
+		ret.xpps = static_cast<short>(hspeed * 60);
+		ret.ypps = static_cast<short>(vspeed * 60);
+		ret.xpos = static_cast<short>(fx + hspeed);
+		ret.ypos = static_cast<short>(fy + vspeed);
+		ret.command = 0;
+		ret.duration = 0;
+		ret.unk = 0;
+		return ret;
+	}
+
+	void player::key_left(bool kst)
+	{
+		if (kst)
+		{
+			keydown[min_right] = false;
+
+			switch (state)
+			{
+			case mst_stand:
+				fleft = true;
+				state = mst_walk;
+				break;
+			case mst_walk:
+				if (!fleft)
+				{
+					fleft = true;
+					hspeed = 0;
+				}
+				else if (hspeed < 0 && !keydown[min_left])
+				{
+					//hspeed = hspeed - 5;
+				}
+				break;
+			case mst_fall:
+				fleft = true;
+				break;
 			}
 		}
 		else
 		{
-			if ((movestate & type) != MC_NONE)
-				newstate = movestate ^ type;
+			if (!keydown[min_right] && state == mst_walk)
+			{
+				state = mst_stand;
+			}
 		}
-		movestate = newstate;
+
+		keydown[min_left] = kst;
+	}
+
+	void player::key_right(bool kst)
+	{
+		if (kst)
+		{
+			keydown[min_left] = false;
+
+			switch (state)
+			{
+			case mst_stand:
+				fleft = false;
+				state = mst_walk;
+				break;
+			case mst_walk:
+				if (fleft)
+				{
+					fleft = false;
+					hspeed = 0;
+				}
+				else if (hspeed > 0 && !keydown[min_left])
+				{
+					//hspeed = hspeed + 5;
+				}
+				break;
+			case mst_fall:
+				fleft = false;
+				break;
+			}
+		}
+		else
+		{
+			if (!keydown[min_left] && state == mst_walk)
+			{
+				state = mst_stand;
+			}
+		}
+
+		keydown[min_right] = kst;
+	}
+
+	void player::key_jump(bool kst)
+	{
+		if (!keydown[min_jump] && kst)
+		{
+			switch (state)
+			{
+			case mst_stand:
+			case mst_walk:
+				if (keydown[min_crouch])
+				{
+					float gbelow = footholds->getgroundbelow(position + vector2d(0, 5));
+					if (gbelow > ground && gbelow - ground < 1000)
+					{
+						setposition(position + vector2d(0, 5));
+					}
+					else
+					{
+						vspeed = -jumpSpeed * (static_cast<float>(jump) / 100);
+					}
+				}
+				else
+				{
+					vspeed = -jumpSpeed * (static_cast<float>(jump) / 100);
+				}
+				state = mst_fall;
+				break;
+			case mst_fall:
+				if (candjump)
+				{
+					hspeed = 8 * (static_cast<float>(jump) / 100);
+					hspeed *= (fleft) ? -1 : 1;
+					vspeed = -jumpSpeed * (static_cast<float>(jump) / 100);
+					candjump = false;
+				}
+				break;
+			case mst_prone:
+				if (candjump)
+				{
+					float gbelow = footholds->getgroundbelow(position + vector2d(0, 5));
+					if (gbelow > ground && gbelow - ground < 1000)
+					{
+						setposition(position + vector2d(0, 5));
+					}
+					else
+					{
+						vspeed = -jumpSpeed * (static_cast<float>(jump) / 100);
+					}
+					state = mst_fall;
+				}
+				break;
+			case mst_climb:
+				if (keydown[min_left] || keydown[min_right])
+				{
+					vspeed = -jumpSpeed * (static_cast<float>(jump) / 200);
+					state = mst_fall;
+					ladrrope.vertical = vector2d();
+				}
+				break;
+			}
+		}
+
+		keydown[min_jump] = kst;
+	}
+
+	void player::key_down(bool kst)
+	{
+		if (kst)
+		{
+			switch (state)
+			{
+			case mst_stand:
+			case mst_walk:
+				hspeed = 0;
+				state = mst_prone;
+				break;
+			case mst_climb:
+				break;
+			}
+		}
+		else
+		{
+			switch (state)
+			{
+			case mst_prone:
+				state = mst_stand;
+				break;
+			}
+		}
+
+		keydown[min_crouch] = kst;
+	}
+
+	void player::key_up(bool kst)
+	{
+		keydown[min_up] = kst;
 	}
 
 	bool player::attack(int skill)
 	{
-		if (look.getstate() != "stabO1")
+		if (state != mst_attack && state != mst_climb)
 		{
-			look.setstate("stabO1");
-			attacking = true;
+			state = mst_attack;
 			return true;
 		}
 		else
@@ -288,7 +515,16 @@ namespace gameplay
 
 		invent.recalcstats();
 
-		stats.basedamage = static_cast<int>((static_cast<float>(5 * stats.level)/100) * invent.gettotal(ES_WATK) * invent.getwepmult());
+		basedamage = static_cast<int>((static_cast<float>(5 * stats.getstat(LEVEL))/100) * invent.gettotal(ES_WATK) * invent.getwepmult());
+	}
+
+	void player::setlr(ladderrope lr)
+	{
+		ladrrope = lr;
+		hspeed = 0;
+		vspeed = min(vspeed, 0);
+		fx = static_cast<float>(lr.x);
+		state = mst_climb;
 	}
 
 	void player::setfh(footholdtree* fh)

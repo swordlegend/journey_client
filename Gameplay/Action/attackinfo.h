@@ -20,27 +20,24 @@
 
 using namespace std;
 
-namespace program
+namespace gameplay
 {
-	enum dwfonts : char
+	struct attackinfo
 	{
-		DWF_LEFT,
-		DWF_CENTER,
-		DWF_RIGHT,
-		DWF_LARGE,
-		dwf_small_r
-	};
-
-	class fontcache
-	{
-	public:
-		fontcache() {}
-		~fontcache();
-		void init(IDWriteFactory*);
-		IDWriteTextFormat* getfont(dwfonts);
-	private:
-		unique_ptr<IDWriteFactory> fontfactory;
-		map<dwfonts, IDWriteTextFormat*> fonts;
+		int skill;
+		float mastery;
+		char maxattacked;
+		char numattacked;
+		char numdamage;
+		int charge;
+		char display;
+		char direction;
+		char stance;
+		char speed;
+		map<int, vector<int>> mobsdamaged;
+		//ranged info
+		char rdirection;
+		//TO DO: meso explosion
 	};
 }
 

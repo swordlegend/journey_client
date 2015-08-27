@@ -33,9 +33,11 @@ namespace net
 				{
 				case 2:
 					app.getui()->add(UI_LOGINNOTICE, 16);
+					app.getui()->enableactions();
 					return;
 				default:
 					app.getui()->add(UI_LOGINNOTICE, reason - 1);
+					app.getui()->enableactions();
 					return;
 				}
 			}
@@ -75,6 +77,7 @@ namespace net
 			app.getui()->getfield()->getworlds()->insert(make_pair(id, world(id, name, flag, svrmsg, channels, chloads)));
 			app.getui()->remove(UI_LOGIN);
 			app.getui()->add(UI_WORLDSELECT);
+			app.getui()->enableactions();
 		}
 	};
 
@@ -104,6 +107,7 @@ namespace net
 			app.getui()->getfield()->getaccount()->addchars(maplechars, pic, slots);
 			app.getui()->remove(UI_WORLDSELECT);
 			app.getui()->add(UI_CHARSEL);
+			app.getui()->enableactions();
 		}
 
 		maplechar getmchar(packet* recv)
@@ -126,23 +130,26 @@ namespace net
 			{
 				pets.push_back(recv->readlong());
 			}
-			short level = recv->readshort();
-			short job = recv->readshort();
-			short str = recv->readshort();
-			short dex = recv->readshort();
-			short int_ = recv->readshort();
-			short luk = recv->readshort();
-			short hp = recv->readshort();
-			short mhp = recv->readshort();
-			short mp = recv->readshort();
-			short mmp = recv->readshort();
-			short ap = recv->readshort();
-			short sp = recv->readshort();
+
+			map<maplestat, short> stats;
+			stats[LEVEL] = recv->readshort();
+			stats[JOB] = recv->readshort();
+			stats[STR] = recv->readshort();
+			stats[DEX] = recv->readshort();
+			stats[INT_] = recv->readshort();
+			stats[LUK] = recv->readshort();
+			stats[HP] = recv->readshort();
+			stats[MAXHP] = recv->readshort();
+			stats[MP] = recv->readshort();
+			stats[MAXMP] = recv->readshort();
+			stats[AP] = recv->readshort();
+			stats[SP] = recv->readshort();
+
 			int exp = recv->readint();
 			short fame = recv->readshort();
-			int map = recv->readint();
+			int mapid = recv->readint();
 			char spawnp = recv->readbyte();
-			return maplestats(id, name, female, skin, face, hair, pets, level, job, str, dex, int_, luk, hp, mhp, mp, mmp, ap, sp, exp, fame, map, spawnp);
+			return maplestats(id, name, female, skin, face, hair, exp, fame, stats, make_pair(mapid, spawnp), pets);
 		}
 
 		maplelook getmlook(packet* recv)
@@ -347,8 +354,9 @@ namespace net
 			app.getui()->remove(UI_CHARSEL);
 			app.getimgcache()->clearcache(ict_login);
 			app.getui()->add(UI_STATUSBAR);
-			app.getui()->getfield()->setplayer(player(app.getui()->getfield()->getaccount()->getplayer(), inv, skills, cooldowns, quests, completedquests, trockmaps, bookcover, bookcards, areainfo));
-			app.getui()->getfield()->setfield(app.getui()->getfield()->getplayer()->getstats()->map, app.getui()->getfield()->getplayer()->getstats()->spawnp);
+			app.getui()->getfield()->setplayer(player(app.getui()->getfield()->getaccount()->getplayer(), inv, meso, skills, cooldowns, quests, completedquests, trockmaps, bookcover, bookcards, areainfo));
+			pair<int, char> spawninfo = app.getui()->getfield()->getplayer()->getstats()->getspawninfo();
+			app.getui()->getfield()->setfield(spawninfo.first, spawninfo.second);
 			app.getui()->enableactions();
 		}
 
@@ -610,11 +618,17 @@ namespace net
 				char mode = recv.readbyte();
 				char invtype = recv.readbyte();
 				short pos = recv.readshort(); //if move: oldposition, else position
-				short arg = recv.readshort();
+				short arg;
+				char addmove;
+				
+				if (mode == 1 || mode == 2)
+				{
+					arg = recv.readshort();
+				}
 
 				if ((mode == 2 && (pos < 0 || arg < 0)) || mode == 3 && pos < 0)
 				{
-					char addmove = recv.readbyte();
+					addmove = recv.readbyte();
 				}
 
 				switch (mode)
@@ -629,7 +643,7 @@ namespace net
 					//move
 					break;
 				case 3:
-					//remove
+					app.getui()->getfield()->getplayer()->getinventory()->removeitem(invtype, pos);
 					break;
 				}
 			}
@@ -641,7 +655,7 @@ namespace net
 		void spawn_mob_h::handle(packet recv)
 		{
 			int oid = recv.readint();
-			bool control = recv.readbool();
+			bool hascontrol = recv.readbool();
 			int id = recv.readint();
 			vector2d pos = recv.readpoint();
 			char stance = recv.readbyte();
@@ -654,7 +668,7 @@ namespace net
 			}
 			bool fadein = recv.readbool();
 			char team = recv.readbyte();
-			app.getui()->getfield()->getmapobjects()->addmob(oid, mob(id, oid, pos, pos, stance, fh, effect, fadein, team));
+			app.getui()->getfield()->getmapobjects()->getmobs()->addmob(oid, id, hascontrol, pos, stance, fh, effect, fadein, team);
 		}
 	};
 
@@ -668,7 +682,7 @@ namespace net
 			{
 				return;
 			}
-			bool control = recv.readbool();
+			recv.readbyte();
 			int id = recv.readint();
 			vector2d pos = recv.readpoint();
 			char stance = recv.readbyte();
@@ -681,7 +695,7 @@ namespace net
 			}
 			bool fadein = recv.readbool();
 			char team = recv.readbyte();
-			app.getui()->getfield()->getmapobjects()->addmob(oid, mob(id, oid, pos, pos, stance, fh, effect, fadein, team));
+			app.getui()->getfield()->getmapobjects()->getmobs()->addmob(oid, id, true, pos, stance, fh, effect, fadein, team);
 		}
 	};
 
@@ -693,7 +707,41 @@ namespace net
 			int updatemask = recv.readint();
 			if (updatemask > 0)
 			{
+				for (char i = 0; i < 20; i++)
+				{
+					maplestat stat = app.getui()->getfield()->getplayer()->getstats()->statvalue(i);
 
+					if ((updatemask & stat) != 0)
+					{
+						switch (stat)
+						{
+						case SKIN:
+							app.getui()->getfield()->getplayer()->getstats()->setskin(recv.readshort());
+							break;
+						case FACE:
+							app.getui()->getfield()->getplayer()->getstats()->setface(recv.readint());
+							break;
+						case HAIR:
+							app.getui()->getfield()->getplayer()->getstats()->sethair(recv.readint());
+							break;
+						case LEVEL:
+							app.getui()->getfield()->getplayer()->getstats()->setstat(LEVEL, static_cast<byte>(recv.readbyte()));
+							break;
+						case EXP:
+							app.getui()->getfield()->getplayer()->getstats()->setexp(recv.readint());
+							break;
+						case FAME:
+							app.getui()->getfield()->getplayer()->getstats()->setfame(recv.readint());
+							break;
+						case MESO:
+							app.getui()->getfield()->getplayer()->getstats()->setmeso(recv.readint());
+							break;
+						default:
+							app.getui()->getfield()->getplayer()->getstats()->setstat(stat, recv.readshort());
+							break;
+						}
+					}
+				}
 			}
 			else
 			{
@@ -760,7 +808,7 @@ namespace net
 		{
 			int oid = recv.readint();
 			char hppercent = recv.readbyte();
-			app.getui()->getfield()->getmapobjects()->sendmobhp(oid, hppercent);
+			app.getui()->getfield()->getmapobjects()->getmobs()->sendmobhp(oid, hppercent);
 		}
 	};
 
@@ -769,8 +817,8 @@ namespace net
 		void kill_mob_h::handle(packet recv)
 		{
 			int oid = recv.readint();
-			int animation = recv.readint();
-			app.getui()->getfield()->getmapobjects()->killmob(oid, animation);
+			char animation = recv.readbyte();
+			app.getui()->getfield()->getmapobjects()->getmobs()->killmob(oid, animation);
 		}
 	};
 
@@ -820,6 +868,61 @@ namespace net
 		}
 	};
 
+	class move_mob_h : public vhandler
+	{
+		void move_mob_h::handle(packet recv)
+		{
+			int oid = recv.readint();
+			recv.readbyte();
+			char useskill = recv.readbyte();
+			char skill = recv.readbyte();
+			char skill1 = recv.readbyte();
+			char skill2 = recv.readbyte();
+			char skill3 = recv.readbyte();
+			char skill4 = recv.readbyte();
+			vector2d startpos = recv.readpoint();
+			//app.getui()->getfield()->getmapobjects()->movemob(oid, movement, fleft);
+		}
+	};
+
+	void parsemovement(packet* recv)
+	{
+		char length = recv->readbyte();
+		for (char i = 0; i < length; i++)
+		{
+
+		}
+	}
+
+	class show_status_info_h : public vhandler
+	{
+		void show_status_info_h::handle(packet recv)
+		{
+			char mode = recv.readbyte();
+			if (mode == 3) //exp
+			{
+				bool white = recv.readbool();
+				int gain = recv.readint();
+				bool inchat = recv.readbool();
+				int bonus1 = recv.readint();
+				recv.readshort();
+				int bonus2 = recv.readint();
+				bool eventorparty = recv.readbool();
+				int bonus3 = recv.readint();
+				int bonus4 = recv.readint();
+				int bonus5 = recv.readint();
+				if (inchat)
+				{
+
+				}
+				else
+				{
+					app.getui()->getbase()->addstatusinfo(white, "You have gained experience (+" + to_string(gain) + ")");
+				}
+			}
+		}
+	};
+
 	packethandler::packethandler()
 	{
 		handlers.insert(make_pair(LOGIN_RESULT, unique_ptr<vhandler>(new login_result_h())));
@@ -831,11 +934,11 @@ namespace net
 		handlers.insert(make_pair(SERVER_MESSAGE, unique_ptr<vhandler>(new server_message_h())));
 		handlers.insert(make_pair(WEEK_EVENT_MESSAGE, unique_ptr<vhandler>(new week_event_messsage_h())));
 		handlers.insert(make_pair(PING, unique_ptr<vhandler>(new ping_h())));
-		handlers.insert(make_pair(SHOW_STATUS_INFO, unique_ptr<vhandler>(new unhandled())));
 		handlers.insert(make_pair(WARP_TO_MAP, unique_ptr<vhandler>(new warp_to_map_h())));
 		handlers.insert(make_pair(MODIFY_INVENTORY, unique_ptr<vhandler>(new modify_inventory_h())));
 		handlers.insert(make_pair(STATS_CHANGED, unique_ptr<vhandler>(new stats_changed_h())));
 		handlers.insert(make_pair(UPDATE_SKILLS, unique_ptr<vhandler>(new update_skills_h())));
+		handlers.insert(make_pair(SHOW_STATUS_INFO, unique_ptr<vhandler>(new show_status_info_h())));
 		handlers.insert(make_pair(MEMO_RESULT, unique_ptr<vhandler>(new memo_result_h())));
 		handlers.insert(make_pair(ENABLE_REPORT, unique_ptr<vhandler>(new enable_report_h())));
 		handlers.insert(make_pair(SCRIPT_PROGRESS_MESSAGE, unique_ptr<vhandler>(new unhandled())));
@@ -843,6 +946,7 @@ namespace net
 		handlers.insert(make_pair(FAMILY_PRIV_LIST, unique_ptr<vhandler>(new family_plist_h())));
 		handlers.insert(make_pair(CHARINFO, unique_ptr<vhandler>(new charinfo_h())));
 		handlers.insert(make_pair(SPAWN_MOB, unique_ptr<vhandler>(new spawn_mob_h())));
+		handlers.insert(make_pair(MOVE_MOB, unique_ptr<vhandler>(new move_mob_h())));
 		handlers.insert(make_pair(KILL_MOB, unique_ptr<vhandler>(new kill_mob_h)));
 		handlers.insert(make_pair(SPAWN_MOB_C, unique_ptr<vhandler>(new spawn_mob_c_h())));
 		handlers.insert(make_pair(SHOW_MOB_HP, unique_ptr<vhandler>(new show_mob_hp_h)));

@@ -16,9 +16,8 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.    //
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
-#include "stdfax.h"
 #include "npc.h"
-#include "mob.h"
+#include "mapmobs.h"
 #include "reactor.h"
 #include "itemdrop.h"
 
@@ -40,18 +39,15 @@ namespace gameplay
 		void clear();
 		void draw(ID2D1HwndRenderTarget*, vector2d);
 		void update();
-		void sendattack(attackinfo*, int, pair<vector2d, vector2d>);
-		void sendmobhp(int, char);
-		void killmob(int, int);
 		void removedrop(int);
 		void addnpc(int, npc);
-		void addmob(int, mob);
 		void addreactor(int, reactor);
 		void additemdrop(int, itemdrop);
+		mapmobs* getmobs() { return &mobs; }
 	private:
 		map<int, mmotype> objects;
 		map<int, npc> npcs;
-		map<int, mob> mobs;
+		mapmobs mobs;
 		map<int, reactor> reactors;
 		map<int, itemdrop> drops;
 		SRWLOCK objlock;

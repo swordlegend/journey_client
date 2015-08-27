@@ -19,64 +19,140 @@
 
 namespace gameplay
 {
-	footholdtree::footholdtree(nl::node source)
+	footholdtree::footholdtree(node source)
 	{
-		for (nl::node basef = source.begin(); basef != source.end(); ++basef)
+		for (node basef = source.begin(); basef != source.end(); ++basef)
 		{
-			for (nl::node midf = basef.begin(); midf != basef.end(); ++midf)
+			for (node midf = basef.begin(); midf != basef.end(); ++midf)
 			{
-				for (nl::node lastf = midf.begin(); lastf != midf.end(); ++lastf)
+				map<short, short> platform;
+
+				for (node lastf = midf.begin(); lastf != midf.end(); ++lastf)
 				{
 					short id = static_cast<short>(stoi(lastf.name()));
 					footholds[id] = struct foothold();
-					footholds[id].prev = static_cast<short>(lastf.resolve("prev").get_integer());
-					footholds[id].next = static_cast<short>(lastf.resolve("next").get_integer());
-					footholds[id].horizontal = vector2d(static_cast<int>(lastf.resolve("x1").get_integer()), static_cast<int>(lastf.resolve("x2").get_integer()));
-					footholds[id].vertical = vector2d(static_cast<int>(lastf.resolve("y1").get_integer()), static_cast<int>(lastf.resolve("y2").get_integer()));
+					footholds[id].prev = static_cast<short>(lastf["prev"]);
+					footholds[id].next = static_cast<short>(lastf["next"]);
+					footholds[id].horizontal = vector2d(static_cast<int>(lastf["x1"]), static_cast<int>(lastf["x2"]));
+					footholds[id].vertical = vector2d(static_cast<int>(lastf["y1"]), static_cast<int>(lastf["y2"]));
+
+					if (footholds[id].prev == 0)
+					{
+						edgesl.push_back(id);
+					}
+					else if (footholds[id].next == 0)
+					{
+						edgesr.push_back(id);
+					}
+
+					/*if (footholds[id].isfloor())
+					{
+						short y = footholds[id].vertical.x();
+
+						for (short i = footholds[id].horizontal.x(); i <= footholds[id].horizontal.y(); i++)
+						{
+							platform[i] = y;
+						}
+					}
+					else 
+					{
+						vector2d slope = footholds[id].vertical;
+						short distance = footholds[id].horizontal.y() - footholds[id].horizontal.x();
+
+						if (slope.x() > slope.y())
+						{
+							float step = static_cast<float>((slope.x() - slope.y())) / distance;
+
+							for (short i = footholds[id].horizontal.x(); i <= footholds[id].horizontal.y(); i++)
+							{
+								platform[i] = slope.x() - static_cast<int>(i * step);
+							}
+						}
+						else
+						{
+							float step = static_cast<float>((slope.y() - slope.x())) / distance;
+
+							for (short i = footholds[id].horizontal.x(); i <= footholds[id].horizontal.y(); i++)
+							{
+								platform[i] = slope.x() + static_cast<int>(i * step);
+							}
+						}
+					}*/
+				}
+
+				platforms.push_back(platform);
+			}
+		}
+
+		lowestg = -65536;
+		for (vector<map<short, short>>::iterator pfit = platforms.begin(); pfit != platforms.end(); ++pfit)
+		{
+			for (map<short, short>::iterator yit = pfit->begin(); yit != pfit->end(); ++yit)
+			{
+				if (yit->second > lowestg)
+				{
+					lowestg = yit->second;
 				}
 			}
 		}
 	}
 
-	void footholdtree::addfoothold(short id, short pr, short nx, vector2d hr, vector2d vr)
-	{
-		footholds[id] = struct foothold();
-		footholds[id].prev = pr;
-		footholds[id].next = nx;
-		footholds[id].horizontal = hr;
-		footholds[id].vertical = vr;
-	}
-
 	float footholdtree::getgroundbelow(vector2d pos)
 	{
-		struct foothold ret = footholds.begin()->second;
-		int ycomp = 65536;
+		foothold ret;
+		float ycomp = 65536;
 		pos = pos - vector2d(0, 5);
-		for (map<short, struct foothold>::iterator ftit = footholds.begin(); ftit != footholds.end(); ftit++)
+		for (map<short, foothold>::iterator ftit = footholds.begin(); ftit != footholds.end(); ftit++)
 		{
-			struct foothold cur = ftit->second;
-			if (cur.horizontal.contains(pos.x()) && ycomp > cur.vertical.y() && cur.vertical.y() > pos.y() && cur.vertical.straight())
+			if (ftit->second.horizontal.contains(pos.x()))
 			{
-				ret = cur;
-				ycomp = cur.vertical.y();
+				float y;
+				if (ftit->second.isfloor())
+				{
+					y = static_cast<float>(ftit->second.vertical.x());
+				}
+				else
+				{
+					float step = static_cast<float>((ftit->second.vertical.y() - ftit->second.vertical.x())) / (ftit->second.horizontal.y() - ftit->second.horizontal.x());
+					y = static_cast<float>(ftit->second.vertical.x() + (step * (pos.x() - ftit->second.horizontal.x())));
+				}
+
+				if (ycomp > y && y > pos.y())
+				{
+					ret = ftit->second;
+					ycomp = y;
+				}
 			}
 		}
 
 		ground = ret;
+		return ycomp;
+		
 
-		if (ret.vertical.straight())
+		/*int closest = lowestg;
+		pos = pos - vector2d(0, 5);
+
+		for (vector<map<short, short>>::iterator pfit = platforms.begin(); pfit != platforms.end(); ++pfit)
 		{
-			return static_cast<float>(ret.vertical.x());
+			if (pfit->count(pos.x()))
+			{
+				int py = pfit->at(pos.x());
+
+				if (py <= closest && py >= pos.y())
+				{
+					closest = py;
+				}
+			}
 		}
-		else
-		{
-			return static_cast<float>((pos.x() - ret.horizontal.x()) * sin((ret.horizontal.y() - ret.horizontal.x()) / (ret.vertical.y() - ret.vertical.x())));
-		}
+
+		return static_cast<float>(closest);*/
 	}
 
 	float footholdtree::nextground(bool left, vector2d pos)
 	{
-		short nextid;
+		//return getgroundbelow(pos);
+
+		short nextid = -1;
 		if (left && pos.x() < ground.horizontal.x())
 		{
 			nextid = ground.prev;
@@ -90,18 +166,57 @@ namespace gameplay
 		{
 			ground = footholds[nextid];
 
-			if (ground.vertical.straight())
+			if (ground.isfloor())
 			{
 				return static_cast<float>(ground.vertical.x());
 			}
 			else
 			{
-				return static_cast<float>((pos.x() - ground.horizontal.x()) * sin((ground.horizontal.y() - ground.horizontal.x()) / (ground.vertical.y() - ground.vertical.x())));
+				float step = static_cast<float>((ground.vertical.y() - ground.vertical.x())) / (ground.horizontal.y() - ground.horizontal.x());
+				return static_cast<float>(ground.vertical.x() + (step * (pos.x() - ground.horizontal.x())));
 			}
 		}
 		else
 		{
 			return getgroundbelow(pos);
 		}
+	}
+
+	vector2d footholdtree::getwalls()
+	{
+		int leftw = 65536;
+		for (vector<short>::iterator fhit = edgesl.begin(); fhit != edgesl.end(); ++fhit)
+		{
+			foothold edge = footholds[*fhit];
+			leftw = min(edge.horizontal.x(), leftw);
+		}
+
+		int rightw = -65536;
+		for (vector<short>::iterator fhit = edgesr.begin(); fhit != edgesr.end(); ++fhit)
+		{
+			foothold edge = footholds[*fhit];
+			rightw = max(edge.horizontal.x(), rightw);
+		}
+
+		return vector2d(leftw + 15, rightw);
+	}
+
+	vector2d footholdtree::getborders()
+	{
+		int botb = -65536;
+		for (map<short, foothold>::iterator fhit = footholds.begin(); fhit != footholds.end(); ++fhit)
+		{
+			int ycomp = max(fhit->second.vertical.x(), fhit->second.vertical.y());
+			botb = max(ycomp, botb);
+		}
+
+		int topb = 65536;
+		for (map<short, foothold>::iterator fhit = footholds.begin(); fhit != footholds.end(); ++fhit)
+		{
+			int ycomp = min(fhit->second.vertical.x(), fhit->second.vertical.y());
+			topb = min(ycomp, topb);
+		}
+
+		return vector2d(topb - 400, botb + 400);
 	}
 }

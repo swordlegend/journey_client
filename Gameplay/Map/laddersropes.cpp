@@ -15,32 +15,32 @@
 // You should have received a copy of the GNU Affero General Public License //
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.    //
 //////////////////////////////////////////////////////////////////////////////
-#pragma once
-#include "stdfax.h"
+#include "laddersropes.h"
 
-using namespace std;
-
-namespace program
+namespace gameplay
 {
-	enum dwfonts : char
+	laddersropes::laddersropes(node src)
 	{
-		DWF_LEFT,
-		DWF_CENTER,
-		DWF_RIGHT,
-		DWF_LARGE,
-		dwf_small_r
-	};
+		for (node lrnode = src.begin(); lrnode != src.end(); ++lrnode)
+		{
+			ladderrope lr;
+			lr.vertical = vector2d(lrnode["y1"], lrnode["y2"]);
+			lr.x = lrnode["x"];
+			lr.ladder = lrnode["l"].get_bool();
+			landr.push_back(lr);
+		}
+	}
 
-	class fontcache
+	ladderrope laddersropes::getlr(vector2d pos)
 	{
-	public:
-		fontcache() {}
-		~fontcache();
-		void init(IDWriteFactory*);
-		IDWriteTextFormat* getfont(dwfonts);
-	private:
-		unique_ptr<IDWriteFactory> fontfactory;
-		map<dwfonts, IDWriteTextFormat*> fonts;
-	};
+		for (vector<ladderrope>::iterator lrit = landr.begin(); lrit != landr.end(); ++lrit)
+		{
+			if (vector2d(pos.x() - 25, pos.x() + 25).contains(lrit->x) && lrit->vertical.contains(pos.y()))
+			{
+				return *lrit;
+			}
+		}
+
+		return ladderrope();
+	}
 }
-

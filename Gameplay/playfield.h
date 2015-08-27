@@ -26,7 +26,9 @@
 #include "maplayer.h"
 #include "mapobjects.h"
 #include "footholdtree.h"
+#include "laddersropes.h"
 #include "mapportals.h"
+//#include "Mp3.h"
 
 namespace gameplay
 {
@@ -49,12 +51,13 @@ namespace gameplay
 		void setfield(int, char);
 		void changechannel(char) {}
 		void setworldchannel(char wld, char chd) { worldid = wld; channelid = chd; }
-		bool moveup();
+		bool moveup(bool);
 		void useattack(int);
 		player* getplayer() { return &playerchar; }
 		account* getaccount() { return &m_account; }
 		mapobjects* getmapobjects() { return &map_objects; }
 		map<char, world>* getworlds() { return &worlds; }
+		vector2d getviewpos() { return view.getposition(); }
 		char getchannel() { return channelid; }
 	private:
 		player playerchar;
@@ -64,9 +67,11 @@ namespace gameplay
 		map<char, maplayer> maplayers;
 		mapobjects map_objects;
 		footholdtree footholds;
+		laddersropes landr;
 		mapportals portals;
 		account m_account;
 		gamestep step;
+		//Mp3 bgm;
 		map<char, world> worlds;
 		char worldid;
 		char channelid;

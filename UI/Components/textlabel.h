@@ -17,30 +17,41 @@
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
 #include "stdfax.h"
+#include "vector2d.h"
 
+using namespace util;
 using namespace std;
 
-namespace program
+namespace graphics
 {
-	enum dwfonts : char
+	enum textcolor
 	{
-		DWF_LEFT,
-		DWF_CENTER,
-		DWF_RIGHT,
-		DWF_LARGE,
-		dwf_small_r
+		txc_black,
+		txc_white,
+		txc_yellow,
+		txc_blue,
+		txc_red
 	};
 
-	class fontcache
+	class textlabel
 	{
 	public:
-		fontcache() {}
-		~fontcache();
-		void init(IDWriteFactory*);
-		IDWriteTextFormat* getfont(dwfonts);
+		textlabel(IDWriteTextFormat*, textcolor, string);
+		textlabel() {}
+		~textlabel() {}
+		void draw(ID2D1HwndRenderTarget*, vector2d);
+		void settext(string s) { text = s; }
+		void setmarker(bool b) { marker = b; }
+		void setalpha(float a) { alpha = a; }
+		string gettext() { return text; }
 	private:
-		unique_ptr<IDWriteFactory> fontfactory;
-		map<dwfonts, IDWriteTextFormat*> fonts;
+		IDWriteTextFormat* font;
+		ID2D1SolidColorBrush* brush;
+		textcolor color;
+		string text;
+		float alpha;
+		bool marker;
+		vector2d position;
 	};
 }
 

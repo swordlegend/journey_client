@@ -20,6 +20,8 @@
 #include "maplechar.h"
 #include "inventory.h"
 #include "footholdtree.h"
+#include "laddersropes.h"
+#include "moveinfo.h"
 
 using namespace std;
 
@@ -30,13 +32,25 @@ namespace gameplay
 	const float jumpSpeed = 9.0f;
 	const float walkSpeed = 2.25f;
 
-	enum movecode : short
+	enum moveinput : char
 	{
-		MC_NONE = 0x0000,
-		MC_LEFT = 0x0001,
-		MC_RIGHT = 0x0010,
-		MC_JUMP = 0x0100,
-		MC_CROUCH = 0x1000
+		min_left,
+		min_right,
+		min_jump,
+		min_crouch,
+		min_attack,
+		min_up
+	};
+
+	enum playerstate : char
+	{
+		mst_stand,
+		mst_walk,
+		mst_fall,
+		mst_prone,
+		mst_dash,
+		mst_attack,
+		mst_climb
 	};
 
 	struct skill
@@ -55,10 +69,35 @@ namespace gameplay
 
 	class player
 	{
+	public:
+		player() {}
+		~player() {}
+		player(maplechar*, inventory, int, map<int, pair<pair<int, int>, long>>, map<int, short>, map<int, pair<string, pair<short, string>>>, map<int, long>, pair<vector<int>, vector<int>>, int, map<short, char>, map<short, string>);
+		maplestats* getstats();
+		inventory* getinventory();
+		vector2d getposition();
+		int getdamage() { return basedamage; }
+		bool onladderrope() { return state == mst_climb; }
+		bool getleft() { return fleft; }
+		void setposition(vector2d);
+		void setfh(footholdtree*);
+		void setlr(ladderrope);
+		void sit(bool);
+		void key_jump(bool);
+		void key_left(bool);
+		void key_right(bool);
+		void key_down(bool);
+		void key_up(bool);
+		bool attack(int);
+		void setexpression(char);
+		void updateskill(int, int, int, long);
+		void draw(ID2D1HwndRenderTarget*, vector2d);
+		movep_info update();
 	private:
 		maplestats stats;
 		maplelook look;
 		inventory invent;
+		int basedamage;
 		map<int, pair<pair<int, int>, long>> skills;
 		map<int, short> cooldowns;
 		map<int, pair<string, pair<short, string>>> quests;
@@ -68,7 +107,7 @@ namespace gameplay
 		map<short, char> bookcards;
 		map<short, string> areainfo;
 		vector2d position;
-		short movestate;
+		ladderrope ladrrope;
 		footholdtree* footholds;
 		short speed;
 		short jump;
@@ -80,27 +119,10 @@ namespace gameplay
 		bool fleft;
 		bool nofriction;
 		void recalcstats(bool);
-		bool walking;
-		bool standing;
 		bool attacking;
-	public:
-		player();
-		~player();
-		player(maplechar*, inventory, map<int, pair<pair<int, int>, long>>, map<int, short>, map<int, pair<string, pair<short, string>>>, map<int, long>, pair<vector<int>, vector<int>>, int, map<short, char>, map<short, string>);
-		maplestats* getstats();
-		inventory* getinventory();
-		vector2d getposition();
-		bool getleft() { return fleft; }
-		void setposition(vector2d);
-		void setfh(footholdtree*);
-		void draw(ID2D1HwndRenderTarget*, vector2d);
-		void update();
-		void crouch(bool);
-		void sit(bool);
-		void move(movecode, bool);
-		bool attack(int);
-		void setexpression(char);
-		void updateskill(int, int, int, long);
+		bool candjump;
+		playerstate state;
+		map<moveinput, bool> keydown;
 	};
 }
 

@@ -23,8 +23,33 @@ namespace io
 {
 	equipinventory::equipinventory(inventory* inv)
 	{
-		equipped = inv->getequipped();
-		equippedcash = inv->getequippedcash();
+		iconpositions = new vector2d[13];
+		iconpositions[0] = vector2d(24, 24);
+		iconpositions[1] = vector2d(43, 58);
+		iconpositions[2] = vector2d(76, 24);
+		iconpositions[3] = vector2d(109, 157);
+		iconpositions[4] = vector2d(109, 122);
+		iconpositions[5] = vector2d(43, 157);
+		iconpositions[6] = vector2d(43, 190);
+		iconpositions[7] = vector2d(75, 223);
+		iconpositions[8] = vector2d(10, 190);
+		iconpositions[9] = vector2d(24, 96);
+		iconpositions[10] = vector2d(48, 96);
+		iconpositions[11] = vector2d(109, 157);
+		iconpositions[12] = vector2d();
+		iconpositions[13] = vector2d();
+
+		invent = inv;
+
+		for (short i = 0; i < 14; i++)
+		{
+			mapleequip* todraw = invent->getequip(i);
+			if (todraw)
+			{
+				int id = todraw->getid();
+				equips[i] = icon(id, false);
+			}
+		}
 
 		app.getimgcache()->setmode(ict_sys);
 		nl::nx::view_file("UI");
@@ -56,8 +81,8 @@ namespace io
 
 	equipinventory::~equipinventory()
 	{
-		delete equipped;
-		delete equippedcash;
+		delete invent;
+		delete iconpositions;
 	}
 
 	void equipinventory::draw(ID2D1HwndRenderTarget* target)
@@ -66,9 +91,14 @@ namespace io
 		{
 			uielement::draw(target);
 
+			for (map<short, icon>::iterator eqit = equips.begin(); eqit != equips.end(); ++eqit)
+			{
+				eqit->second.draw(position + iconpositions[eqit->first], 1.0f);
+			}
+
 			if (showpet)
 			{
-				for (vector<sprite>::iterator petit = petsprites.begin(); petit != petsprites.end(); petit++)
+				for (vector<sprite>::iterator petit = petsprites.begin(); petit != petsprites.end(); ++petit)
 				{
 					petit->draw(target, position);
 				}

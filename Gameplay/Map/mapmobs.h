@@ -16,31 +16,28 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.    //
 //////////////////////////////////////////////////////////////////////////////
 #pragma once
-#include "stdfax.h"
+#include "mob.h"
+#include "safemap.h"
 
-using namespace std;
+using namespace util;
 
-namespace program
+namespace gameplay
 {
-	enum dwfonts : char
-	{
-		DWF_LEFT,
-		DWF_CENTER,
-		DWF_RIGHT,
-		DWF_LARGE,
-		dwf_small_r
-	};
-
-	class fontcache
+	class mapmobs
 	{
 	public:
-		fontcache() {}
-		~fontcache();
-		void init(IDWriteFactory*);
-		IDWriteTextFormat* getfont(dwfonts);
+		mapmobs() {}
+		~mapmobs() {}
+		void addmob(int, int, bool, vector2d, char, short, char, bool, char);
+		void sendattack(attackinfo*, int, pair<vector2d, vector2d>);
+		void sendmobhp(int, char);
+		void movemob(int, char, bool);
+		void killmob(int, char);
+		void draw(ID2D1HwndRenderTarget*, vector2d);
+		void update();
+		void clear();
 	private:
-		unique_ptr<IDWriteFactory> fontfactory;
-		map<dwfonts, IDWriteTextFormat*> fonts;
+		safemap<int, mob> mobs;
 	};
 }
 

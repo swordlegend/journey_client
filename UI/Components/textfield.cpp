@@ -22,14 +22,12 @@ namespace io
 {
 	textfield::textfield(IDWriteTextFormat* fnt, textcolor col, string default, vector2d pos, int length)
 	{
-		font = fnt;
-		color = col;
-		content = default;
+		content = textlabel(fnt, col, default);
 		position = pos;
 		maxlength = length;
 		state = "inactive";
 		showmark = false;
-		markpos = content.length();
+		markpos = default.length();
 	}
 
 	pair<vector2d, vector2d> textfield::bounds()
@@ -41,46 +39,23 @@ namespace io
 	{
 		vector2d absp = position + parentpos;
 
-		if (content == "" && state == "inactive")
+		if (content.gettext() == "" && state == "inactive")
 		{
 			bg.draw(absp + bgposition);
-			return;
 		}
-
-		string temp = content;
-
-		D2D1_RECT_F layoutRect = D2D1::RectF(
-			static_cast<FLOAT>(absp.x()),
-			static_cast<FLOAT>(absp.y()),
-			static_cast<FLOAT>(absp.x() + (12 * maxlength)),
-			static_cast<FLOAT>(absp.y() + 24)
-			);
-
-		if (state == "active" && showmark && markpos == content.length())
+		else
 		{
-			temp.append("|");
+			if (state == "active" && showmark && markpos == content.gettext().length())
+			{
+				content.setmarker(true);
+			}
+			else
+			{
+				content.setmarker(false);
+			}
+
+			content.draw(target, absp);
 		}
-
-		wstring wide_string(temp.begin(), temp.end());
-
-		ID2D1SolidColorBrush* brush = 0;
-		switch (color)
-		{
-		case TXC_WHITE:
-			target->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &brush);
-			break;
-		case TXC_BLACK:
-			target->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &brush);
-			break;
-		}
-
-		target->DrawText(
-			wide_string.c_str(),
-			wide_string.length(),
-			font,
-			layoutRect,
-			brush
-			);
 	}
 
 	void textfield::update()
@@ -104,7 +79,7 @@ namespace io
 		elapsed = 0;
 		showmark = true;
 		state = st;
-		markpos = content.length();
+		markpos = content.gettext().length();
 	}
 
 	void textfield::sendchar(char letter)
@@ -112,30 +87,20 @@ namespace io
 		if (letter == 0 && markpos > 0)
 		{
 			markpos--;
-			content.erase(markpos, 1);
+			content.settext(content.gettext().erase(markpos, 1));
 		}
-		else if (letter > 2 && content.length() < maxlength)
+		else if (letter > 2 && content.gettext().length() < maxlength)
 		{
-			content.insert(markpos, &letter);
+			content.settext(content.gettext().insert(markpos, &letter));
 			markpos++;
 		}
 		else if (letter == 1 && markpos > 0)
 		{
 			markpos -= 1;
 		}
-		else if (letter == 2 && markpos < content.length())
+		else if (letter == 2 && markpos < content.gettext().length())
 		{
 			markpos += 1;
 		}
-	}
-
-	string textfield::getstate()
-	{
-		return state;
-	}
-
-	string textfield::text()
-	{
-		return content;
 	}
 }

@@ -66,7 +66,7 @@ namespace gameplay
 	{
 		for (vector<maplechar>::iterator mchar = maplechars.begin(); mchar != maplechars.end(); mchar++)
 		{
-			if (mchar->getstats()->id == cid)
+			if (mchar->getstats()->getid() == cid)
 				break;
 			selected++;
 		}

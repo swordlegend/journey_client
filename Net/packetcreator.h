@@ -39,6 +39,8 @@ namespace net
 		DELETE_CHAR = 23,
 		PONG = 24,
 		CHANGEMAP = 38,
+		MOVE_PLAYER = 41,
+		CLOSE_ATTACK = 44,
 		BANME = 4919
 	};
 
@@ -58,7 +60,9 @@ namespace net
 		void deletechar(string, int);
 		void selectchar(int);
 		void playerlogin(int);
+		void moveplayer(movep_info);
 		void changemap(bool, int, string, bool);
+		void close_attack(attackinfo);
 	};
 }
 

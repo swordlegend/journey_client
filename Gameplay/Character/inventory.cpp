@@ -29,10 +29,12 @@ namespace gameplay
 		setupitems = si;
 		etcitems = ei;
 		cashitems = ci;
+		itemlock = SRWLOCK_INIT;
 	}
 
 	void inventory::recalcstats()
 	{
+		AcquireSRWLockShared(&itemlock);
 		for (equipstat es = ES_STR; es <= ES_JUMP; es = static_cast<equipstat>(es + 1))
 		{
 			totalstats[es] = 0;
@@ -47,5 +49,33 @@ namespace gameplay
 		}
 
 		wepmultiplier = 1.5f;
+		ReleaseSRWLockShared(&itemlock);
+	}
+
+	void inventory::removeitem(char type, short slot)
+	{
+		AcquireSRWLockExclusive(&itemlock);
+		switch (type)
+		{
+		case IT_EQUIPS:
+			equipped.erase(slot);
+			break;
+		case IT_EQUIP:
+			equips.erase(slot);
+			break;
+		case IT_USE:
+			useitems.erase(slot);
+			break;
+		case IT_SETUP:
+			setupitems.erase(slot);
+			break;
+		case IT_ETC:
+			etcitems.erase(slot);
+			break;
+		case IT_CASH:
+			cashitems.erase(slot);
+			break;
+		}
+		ReleaseSRWLockExclusive(&itemlock);
 	}
 }

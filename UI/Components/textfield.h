@@ -18,31 +18,14 @@
 #pragma once
 #include "stdfax.h"
 #include "texture.h"
+#include "textlabel.h"
 
 using namespace graphics;
 
 namespace io
 {
-	enum textcolor : char
-	{
-		TXC_WHITE,
-		TXC_BLACK
-	};
-	
 	class textfield
 	{
-	private:
-		texture bg;
-		IDWriteTextFormat* font;
-		textcolor color;
-		string content;
-		vector2d position;
-		string state;
-		vector2d bgposition;
-		int maxlength;
-		int markpos;
-		bool showmark;
-		short elapsed;
 	public:
 		textfield(IDWriteTextFormat*, textcolor, string, vector2d, int);
 		textfield() {}
@@ -53,8 +36,18 @@ namespace io
 		void setstate(string);
 		void sendchar(char);
 		void setbg(texture, int, int);
-		string getstate();
-		string text();
+		string getstate() { return state; }
+		string text() { return content.gettext(); }
+	private:
+		texture bg;
+		textlabel content;
+		vector2d position;
+		string state;
+		vector2d bgposition;
+		int maxlength;
+		int markpos;
+		bool showmark;
+		short elapsed;
 	};
 }
 
